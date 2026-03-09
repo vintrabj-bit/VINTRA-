@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VINTRA — Creating brands that move.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@200;300;400;500;600;700;900&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<!-- Kkiapay SDK (Mobile Money Bénin) -->
+<script src="https://cdn.kkiapay.me/k.js"></script>
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://checkout.flutterwave.com/v3.js"></script>
+<style>
+:root {
+  --black: #000;
+  --white: #fff;
+  --grey: #111;
+  --grey2: #1a1a1a;
+  --grey3: #333;
+  --grey4: #666;
+  --grey5: #999;
+  --accent: #e8ff00;
+  --accent2: #00ff88;
+  --red: #ff2d2d;
+  --gold: #d4a843;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Outfit', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body { background: var(--black); color: var(--white); font-family: var(--font-body); font-weight: 300; overflow-x: hidden; cursor: none; }
+::-webkit-scrollbar { width: 2px; }
+::-webkit-scrollbar-thumb { background: var(--grey3); }
+
+/* CURSOR */
+#cur { position: fixed; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .2s, height .2s, background .2s; }
+#cur-ring { position: fixed; width: 36px; height: 36px; border: 1px solid rgba(232,255,0,0.4); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: all .12s ease; }
+#cur.big { width: 60px; height: 60px; background: transparent; border: 2px solid var(--accent); }
+#cur-ring.big { width: 80px; height: 80px; }
+
+/* LOADER */
+#loader { position: fixed; inset: 0; background: #000; z-index: 9000; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 32px; }
+#loader .loader-letters { display: flex; gap: 0.05em; }
+#loader .loader-letters span { font-family: var(--font-display); font-size: clamp(72px, 14vw, 130px); letter-spacing: 0.18em; color: white; opacity: 0; transform: translateY(40px); display: inline-block; animation: letterUp 0.5s cubic-bezier(.16,1,.3,1) forwards; }
+#loader .loader-letters span.accent { color: var(--accent); }
+#loader .tagline { font-size: 11px; letter-spacing: 0.5em; text-transform: uppercase; color: var(--grey4); opacity: 0; animation: fadeIn .6s ease 1.6s forwards; }
+#loader .bar-wrap { width: 240px; height: 1px; background: var(--grey3); opacity: 0; animation: fadeIn .4s ease 1.8s forwards; }
+#loader .bar { height: 1px; background: var(--accent); width: 0; animation: loadBar 1.8s ease 2s forwards; }
+@keyframes loadBar { to { width: 100%; } }
+@keyframes fadeIn { to { opacity: 1; } }
+@keyframes letterUp { to { opacity: 1; transform: translateY(0); } }
+
+/* NAV */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; display: flex; align-items: center; justify-content: space-between; padding: 24px 48px; transition: all .3s; }
+nav.scrolled { background: rgba(0,0,0,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--grey2); }
+.nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.nav-logo img { width: 44px; height: 44px; object-fit: contain; filter: brightness(0) invert(1); }
+.nav-logo span { font-family: var(--font-display); font-size: 28px; letter-spacing: 0.15em; color: white; }
+.nav-links { display: flex; gap: 36px; list-style: none; }
+.nav-links a { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--grey5); text-decoration: none; transition: color .3s; }
+.nav-links a:hover { color: var(--accent); }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.cart-btn { position: relative; background: none; border: 1px solid var(--grey3); color: white; padding: 10px 20px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; cursor: none; transition: all .3s; }
+.cart-btn:hover { border-color: var(--accent); color: var(--accent); }
+.cart-count { position: absolute; top: -8px; right: -8px; background: var(--accent); color: black; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; display: none; }
+.admin-btn { background: none; border: none; color: var(--grey3); font-size: 18px; cursor: none; transition: color .3s; }
+.admin-btn:hover { color: var(--gold); }
+
+/* HERO */
+.hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #000; }
+.hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(232,255,0,0.07) 0%, transparent 65%); }
+.hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 60px 60px; }
+.hero-orb { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(232,255,0,0.06) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); animation: orbPulse 6s ease-in-out infinite; pointer-events: none; }
+@keyframes orbPulse { 0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.6} 50%{transform:translate(-50%,-50%) scale(1.15);opacity:1} }
+.hero-content { position: relative; z-index: 2; text-align: center; padding: 0 24px; }
+.hero-eyebrow { font-size: 11px; letter-spacing: 0.6em; text-transform: uppercase; color: var(--grey5); margin-bottom: 28px; opacity: 0; }
+.hero-brand { font-family: var(--font-display); font-size: clamp(100px, 20vw, 260px); letter-spacing: 0.12em; line-height: 0.85; color: white; opacity: 0; position: relative; }
+.hero-brand .accent-v { color: var(--accent); text-shadow: 0 0 60px rgba(232,255,0,0.4); }
+.hero-shine { position: absolute; inset: 0; background: linear-gradient(105deg, transparent 40%, rgba(232,255,0,0.15) 50%, transparent 60%); background-size: 200% 100%; animation: shine 4s ease-in-out infinite 2s; pointer-events: none; }
+@keyframes shine { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.hero-tagline { font-family: var(--font-serif); font-style: italic; font-size: clamp(17px, 2vw, 24px); color: #ccc; margin-top: 28px; letter-spacing: 0.05em; opacity: 0; }
+.hero-counters { display: flex; gap: 48px; justify-content: center; margin-top: 40px; opacity: 0; }
+.hero-counter { text-align: center; }
+.hero-counter .num { font-family: var(--font-display); font-size: 48px; color: var(--accent); letter-spacing: 0.05em; display: block; line-height: 1; }
+.hero-counter .lbl { font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--grey5); margin-top: 4px; display: block; }
+.hero-counter-divider { width: 1px; background: var(--grey3); align-self: stretch; }
+.hero-cta { margin-top: 52px; display: flex; gap: 16px; justify-content: center; opacity: 0; flex-wrap: wrap; }
+.btn-primary { background: var(--accent); color: black; padding: 18px 44px; font-family: var(--font-body); font-size: 12px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; border: none; cursor: none; transition: all .3s; clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%); }
+.btn-primary:hover { background: white; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,255,0,0.3); }
+.btn-secondary { background: transparent; color: white; padding: 18px 44px; font-family: var(--font-body); font-size: 12px; letter-spacing: 0.25em; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.3); cursor: none; transition: all .3s; }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.hero-scroll { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; }
+.hero-scroll span { font-size: 9px; letter-spacing: 0.4em; color: var(--grey5); text-transform: uppercase; }
+.scroll-line { width: 1px; height: 48px; background: linear-gradient(to bottom, var(--grey4), transparent); animation: scrollAnim 2s ease infinite; }
+@keyframes scrollAnim { 0%,100%{opacity:.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.3)} }
+
+/* TRUST BADGES */
+.trust-bar { background: var(--grey2); border-top: 1px solid var(--grey3); border-bottom: 1px solid var(--grey3); padding: 20px 48px; display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
+.trust-item { display: flex; align-items: center; gap: 10px; }
+.trust-icon { font-size: 20px; }
+.trust-text { font-size: 11px; letter-spacing: 0.15em; color: #bbb; text-transform: uppercase; font-weight: 500; }
+
+/* PROMO BANNER */
+.promo-banner { background: linear-gradient(135deg, #0d0d0d 0%, #1a1a00 50%, #0d0d0d 100%); border: 1px solid rgba(232,255,0,0.2); margin: 48px 48px 0; padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; max-width: 1304px; margin-left: auto; margin-right: auto; }
+.promo-left { display: flex; flex-direction: column; gap: 8px; }
+.promo-tag { font-size: 9px; letter-spacing: 0.5em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.promo-title { font-family: var(--font-display); font-size: clamp(24px, 4vw, 40px); letter-spacing: 0.1em; color: white; line-height: 1; }
+.promo-sub { font-size: 13px; color: #aaa; }
+.promo-right { display: flex; align-items: center; gap: 32px; }
+.promo-price { text-align: right; }
+.promo-price .from { font-size: 10px; letter-spacing: 0.3em; color: var(--grey5); text-transform: uppercase; }
+.promo-price .amount { font-family: var(--font-display); font-size: 40px; color: var(--accent); letter-spacing: 0.05em; line-height: 1; }
+
+/* TOP MODELS */
+.top-models { padding: 60px 48px; max-width: 1400px; margin: 0 auto; }
+.top-models-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; }
+.top-models-title { font-family: var(--font-display); font-size: clamp(32px, 5vw, 56px); letter-spacing: 0.1em; color: white; }
+.top-models-sub { font-size: 11px; letter-spacing: 0.3em; color: var(--grey5); text-transform: uppercase; }
+.top-models-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* BRANDS SECTION */
+.brands-section { padding: 80px 48px; max-width: 1400px; margin: 0 auto; }
+.velox-hero-card { background: linear-gradient(135deg, #0a0a0a 0%, #111100 50%, #0a0a0a 100%); border: 1px solid rgba(232,255,0,0.25); padding: 56px 64px; display: flex; align-items: center; justify-content: space-between; gap: 40px; cursor: none; transition: all .4s; position: relative; overflow: hidden; margin-bottom: 32px; }
+.velox-hero-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 40%, rgba(232,255,0,0.04) 50%, transparent 60%); background-size: 200% 100%; animation: cardShine 5s ease-in-out infinite; }
+@keyframes cardShine { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.velox-hero-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(232,255,0,0.1); }
+.velox-hero-left { display: flex; flex-direction: column; gap: 16px; }
+.velox-hero-tag { font-size: 10px; letter-spacing: 0.5em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.velox-hero-name { font-family: var(--font-display); font-size: clamp(64px, 10vw, 120px); letter-spacing: 0.15em; color: white; line-height: 0.9; }
+.velox-hero-slogan { font-family: var(--font-serif); font-style: italic; font-size: 18px; color: #bbb; }
+.velox-hero-stats { display: flex; gap: 32px; margin-top: 8px; }
+.velox-stat { display: flex; flex-direction: column; gap: 4px; }
+.velox-stat .num { font-family: var(--font-display); font-size: 32px; color: var(--accent); letter-spacing: 0.05em; }
+.velox-stat .lbl { font-size: 9px; letter-spacing: 0.35em; color: #999; text-transform: uppercase; }
+.velox-hero-right { display: flex; flex-direction: column; align-items: flex-end; gap: 20px; }
+.velox-cta-big { background: var(--accent); color: black; padding: 20px 52px; font-family: var(--font-body); font-size: 13px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; border: none; cursor: none; transition: all .3s; clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%); white-space: nowrap; }
+.velox-cta-big:hover { background: white; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,255,0,0.3); }
+.velox-active-badge { display: flex; align-items: center; gap: 8px; }
+.velox-active-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; box-shadow: 0 0 12px var(--accent); }
+.velox-active-text { font-size: 10px; letter-spacing: 0.4em; color: var(--accent); text-transform: uppercase; }
+
+/* OTHER BRANDS GRID */
+.other-brands-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.brand-card { background: #0d0d0d; border: 1px solid #222; padding: 36px 40px; position: relative; overflow: hidden; cursor: not-allowed; transition: all .3s; }
+.brand-card:hover { background: #141414; border-color: #333; }
+.brand-icon { font-size: 32px; margin-bottom: 20px; }
+.brand-name { font-family: var(--font-display); font-size: 36px; letter-spacing: 0.15em; color: white; margin-bottom: 8px; }
+.brand-cat { font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: #888; margin-bottom: 12px; }
+.brand-slogan { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: #777; margin-bottom: 24px; }
+.brand-status { font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: #555; display: flex; align-items: center; gap: 8px; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--grey3); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+/* VINTRA TICKER */
+.vintra-bar { background: var(--grey2); border-top: 1px solid var(--grey3); border-bottom: 1px solid var(--grey3); padding: 10px 0; overflow: hidden; }
+.vintra-track { display: flex; gap: 0; animation: ticker 20s linear infinite; width: max-content; }
+.vintra-item { display: flex; align-items: center; gap: 24px; padding: 0 32px; white-space: nowrap; }
+.vintra-item span { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #888; }
+.vintra-item .dot { width: 3px; height: 3px; background: #555; border-radius: 50%; }
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.section-header { padding: 80px 48px 48px; display: flex; justify-content: space-between; align-items: flex-end; max-width: 1400px; margin: 0 auto; }
+.section-label { font-size: 9px; letter-spacing: 0.5em; text-transform: uppercase; color: var(--grey4); }
+.section-title { font-family: var(--font-display); font-size: clamp(40px, 6vw, 72px); letter-spacing: 0.08em; color: white; line-height: 1; }
+.section-count { font-family: var(--font-display); font-size: 80px; color: var(--grey2); letter-spacing: -0.02em; }
+
+/* GAMME TABS */
+.gamme-tabs { display: flex; gap: 0; overflow-x: auto; padding: 0 48px; border-bottom: 1px solid var(--grey2); scrollbar-width: none; max-width: 1400px; margin: 0 auto; }
+.gamme-tabs::-webkit-scrollbar { display: none; }
+.gamme-tab { padding: 16px 28px; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--grey4); background: none; border: none; border-bottom: 2px solid transparent; cursor: none; transition: all .3s; white-space: nowrap; margin-bottom: -1px; }
+.gamme-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.gamme-tab.locked { color: var(--grey3); }
+.gamme-tab.locked::after { content: ' 🔒'; font-size: 8px; }
+.gamme-tab:hover:not(.locked) { color: white; }
+
+/* PRODUCTS GRID */
+.products-section { padding: 40px 48px 80px; max-width: 1400px; margin: 0 auto; }
+.products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.product-card { background: var(--grey2); position: relative; overflow: hidden; cursor: none; group; }
+.product-card::before { content: ''; position: absolute; inset: 0; background: var(--accent); opacity: 0; transition: opacity .4s; z-index: 0; }
+.product-card:hover::before { opacity: 0.03; }
+.product-card:hover .product-img-wrap img { transform: scale(1.04); }
+.product-card:hover .product-arrow { opacity: 1; transform: translate(0,0); }
+.product-img-wrap { position: relative; aspect-ratio: 3/4; overflow: hidden; background: #f5f5f5; }
+.product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; display: block; }
+.product-badge { position: absolute; top: 16px; left: 16px; background: var(--accent); color: black; font-size: 8px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; z-index: 2; }
+.product-badge.limited { background: var(--gold); }
+.product-badge.locked { background: var(--grey3); color: var(--grey5); }
+.product-arrow { position: absolute; top: 16px; right: 16px; color: var(--accent); font-size: 20px; opacity: 0; transform: translate(4px, -4px); transition: all .3s; z-index: 2; }
+.product-info { padding: 20px; position: relative; z-index: 1; }
+.product-gamme { font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: #aaa; margin-bottom: 6px; }
+.product-name { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.1em; color: white; margin-bottom: 6px; }
+.product-desc { font-size: 12px; color: #bbb; margin-bottom: 16px; line-height: 1.6; }
+.product-bottom { display: flex; justify-content: space-between; align-items: center; }
+.product-price { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.05em; color: var(--accent); }
+.product-price .currency { font-size: 12px; color: #999; margin-left: 4px; }
+.product-btn { background: none; border: 1px solid #555; color: #ccc; padding: 8px 16px; font-family: var(--font-body); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; cursor: none; transition: all .3s; }
+.product-btn:hover { border-color: var(--accent); color: var(--accent); }
+.product-btn.preorder { border-color: #444; color: #999; }
+
+/* LOCKED GAMME OVERLAY */
+.locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 10; backdrop-filter: blur(4px); }
+.locked-icon { font-size: 32px; }
+.locked-text { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--grey4); }
+.preorder-form { display: flex; gap: 0; width: 220px; }
+.preorder-input { flex: 1; background: var(--grey2); border: 1px solid var(--grey3); border-right: none; color: white; padding: 10px 12px; font-family: var(--font-body); font-size: 11px; outline: none; }
+.preorder-input::placeholder { color: var(--grey4); }
+.preorder-submit { background: var(--accent); border: none; color: black; padding: 10px 14px; font-size: 14px; cursor: none; transition: background .3s; }
+.preorder-submit:hover { background: white; }
+
+/* PRODUCT MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(10px); }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--grey); max-width: 1000px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; display: grid; grid-template-columns: 1fr 1fr; }
+.modal::-webkit-scrollbar { width: 2px; }
+.modal-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--grey5); font-size: 24px; cursor: none; z-index: 10; transition: color .3s; }
+.modal-close:hover { color: var(--accent); }
+
+/* VIEWER */
+.viewer { padding: 40px; background: #f0f0f0; display: flex; flex-direction: column; gap: 12px; }
+.viewer-main {
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: #e8e8e8;
+  cursor: zoom-in;
+}
+.viewer-img {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  transition: background-position 0.45s cubic-bezier(.4,0,.2,1),
+              background-size 0.45s cubic-bezier(.4,0,.2,1);
+}
+.viewer-label {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(0,0,0,0.55);
+  color: white;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  font-family: var(--font-body);
+  backdrop-filter: blur(4px);
+  transition: opacity .3s;
+}
+.viewer-angles { display: flex; gap: 6px; }
+.angle-btn {
+  flex: 1;
+  background: white;
+  border: 2px solid transparent;
+  cursor: none;
+  overflow: hidden;
+  transition: border-color .25s;
+  padding: 0;
+  position: relative;
+}
+.angle-btn.active { border-color: #111; }
+.angle-thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  background-repeat: no-repeat;
+  transition: background-size .3s, background-position .3s;
+}
+.angle-lbl {
+  font-size: 8px;
+  text-align: center;
+  color: #666;
+  padding: 4px 2px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+  background: white;
+}
+
+/* MODAL INFO */
+.modal-info { padding: 40px; display: flex; flex-direction: column; gap: 24px; }
+.modal-brand { font-size: 9px; letter-spacing: 0.45em; text-transform: uppercase; color: var(--grey4); }
+.modal-name { font-family: var(--font-display); font-size: 48px; letter-spacing: 0.08em; line-height: 1; color: white; }
+.modal-tagline { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--grey5); }
+.modal-desc { font-size: 13px; line-height: 1.7; color: var(--grey5); }
+.modal-price-wrap { display: flex; align-items: baseline; gap: 8px; }
+.modal-price { font-family: var(--font-display); font-size: 40px; color: var(--accent); }
+.modal-currency-select { background: var(--grey2); border: 1px solid var(--grey3); color: var(--grey5); padding: 6px 10px; font-family: var(--font-body); font-size: 11px; cursor: none; outline: none; }
+
+/* SIZE SELECT */
+.size-label { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--grey4); margin-bottom: 10px; }
+.sizes { display: flex; gap: 8px; flex-wrap: wrap; }
+.size-btn { width: 44px; height: 44px; background: none; border: 1px solid var(--grey3); color: var(--grey5); font-family: var(--font-body); font-size: 12px; cursor: none; transition: all .3s; }
+.size-btn:hover, .size-btn.selected { background: var(--accent); border-color: var(--accent); color: black; font-weight: 700; }
+.size-btn.unavailable { opacity: 0.3; cursor: not-allowed; }
+
+/* ADD TO CART */
+.add-cart-btn { background: var(--accent); color: black; padding: 18px; font-family: var(--font-body); font-size: 12px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; border: none; cursor: none; transition: all .3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.add-cart-btn:hover { background: white; transform: translateY(-2px); }
+.add-cart-btn.preorder-mode { background: var(--grey2); border: 1px solid var(--grey3); color: var(--grey5); }
+.add-cart-btn.preorder-mode:hover { border-color: var(--accent); color: var(--accent); background: transparent; }
+
+/* PREORDER EMAIL */
+.preorder-section { border: 1px solid var(--grey3); padding: 20px; }
+.preorder-title { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--grey4); margin-bottom: 12px; }
+.preorder-row { display: flex; gap: 0; }
+.preorder-row input { flex: 1; background: var(--grey2); border: 1px solid var(--grey3); border-right: none; color: white; padding: 12px 16px; font-family: var(--font-body); font-size: 12px; outline: none; }
+.preorder-row input::placeholder { color: var(--grey4); }
+.preorder-row button { background: var(--accent); border: none; color: black; padding: 12px 20px; font-size: 12px; cursor: none; }
+
+/* CART SIDEBAR */
+.cart-sidebar { position: fixed; right: -420px; top: 0; bottom: 0; width: 420px; background: var(--grey); z-index: 800; transition: right .4s cubic-bezier(.4,0,.2,1); border-left: 1px solid var(--grey2); display: flex; flex-direction: column; }
+.cart-sidebar.open { right: 0; }
+.cart-header { padding: 24px; border-bottom: 1px solid var(--grey2); display: flex; justify-content: space-between; align-items: center; }
+.cart-title { font-family: var(--font-display); font-size: 24px; letter-spacing: 0.15em; }
+.cart-close { background: none; border: none; color: var(--grey5); font-size: 20px; cursor: none; }
+.cart-items { flex: 1; overflow-y: auto; padding: 24px; }
+.cart-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--grey2); }
+.cart-item img { width: 70px; height: 90px; object-fit: cover; background: #f5f5f5; }
+.cart-item-info { flex: 1; }
+.cart-item-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.cart-item-size { font-size: 11px; color: var(--grey4); margin-bottom: 8px; }
+.cart-item-price { font-family: var(--font-display); font-size: 18px; color: var(--accent); }
+.cart-item-remove { background: none; border: none; color: var(--grey4); cursor: none; font-size: 16px; align-self: start; transition: color .3s; }
+.cart-item-remove:hover { color: var(--red); }
+.cart-empty { text-align: center; padding: 60px 0; color: var(--grey4); font-size: 13px; letter-spacing: 0.1em; }
+.cart-footer { padding: 24px; border-top: 1px solid var(--grey2); }
+.cart-total { display: flex; justify-content: space-between; margin-bottom: 20px; }
+.cart-total-label { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--grey4); }
+.cart-total-price { font-family: var(--font-display); font-size: 28px; color: var(--accent); }
+.checkout-btn { width: 100%; background: var(--accent); color: black; padding: 18px; font-family: var(--font-body); font-size: 12px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; border: none; cursor: none; transition: background .3s; }
+.checkout-btn:hover { background: white; }
+.payment-logos { display: flex; gap: 8px; margin-top: 12px; align-items: center; justify-content: center; }
+.payment-logo { font-size: 9px; letter-spacing: 0.15em; color: var(--grey3); border: 1px solid var(--grey3); padding: 4px 8px; }
+
+/* OTHER BRANDS */
+.brands-section { padding: 80px 48px; max-width: 1400px; margin: 0 auto; }
+.brands-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+.brand-card { background: var(--grey2); padding: 48px 32px; position: relative; overflow: hidden; transition: background .4s; }
+.brand-card::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--brand-accent, var(--accent)); transform: scaleX(0); transition: transform .4s; }
+.brand-card:hover::before { transform: scaleX(1); }
+.brand-card:hover { background: #1e1e1e; }
+.brand-icon { font-size: 32px; margin-bottom: 20px; }
+.brand-name { font-family: var(--font-display); font-size: 32px; letter-spacing: 0.15em; color: white; margin-bottom: 8px; }
+.brand-cat { font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--grey4); margin-bottom: 16px; }
+.brand-slogan { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: var(--grey4); margin-bottom: 24px; }
+.brand-status { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--grey3); display: flex; align-items: center; gap: 6px; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--grey3); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+/* ADMIN PANEL */
+.admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+.admin-overlay.open { display: flex; }
+.admin-panel { background: var(--grey); width: 560px; max-height: 80vh; overflow-y: auto; border: 1px solid var(--grey3); }
+.admin-header { padding: 24px; border-bottom: 1px solid var(--grey2); display: flex; justify-content: space-between; align-items: center; background: var(--grey2); }
+.admin-title { font-family: var(--font-display); font-size: 20px; letter-spacing: 0.2em; color: var(--gold); }
+.admin-close { background: none; border: none; color: var(--grey5); font-size: 18px; cursor: none; }
+.admin-login { padding: 40px; text-align: center; }
+.admin-login h3 { font-family: var(--font-display); font-size: 24px; letter-spacing: 0.15em; margin-bottom: 24px; color: var(--gold); }
+.admin-input { width: 100%; background: var(--grey2); border: 1px solid var(--grey3); color: white; padding: 14px 16px; font-family: var(--font-body); font-size: 13px; outline: none; margin-bottom: 12px; }
+.admin-input:focus { border-color: var(--gold); }
+.admin-submit { width: 100%; background: var(--gold); color: black; padding: 14px; font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; border: none; cursor: none; }
+.admin-content { display: none; padding: 24px; }
+.admin-content.visible { display: block; }
+.admin-section-title { font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--grey2); }
+.gamme-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--grey2); }
+.gamme-row-info { display: flex; flex-direction: column; gap: 4px; }
+.gamme-row-name { font-size: 13px; font-weight: 500; }
+.gamme-row-count { font-size: 10px; color: var(--grey4); letter-spacing: 0.1em; }
+.gamme-toggle { display: flex; gap: 8px; align-items: center; }
+.toggle-btn { padding: 6px 14px; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; border: 1px solid; cursor: none; transition: all .3s; background: none; }
+.toggle-btn.unlock { border-color: var(--accent); color: var(--accent); }
+.toggle-btn.unlock:hover { background: var(--accent); color: black; }
+.toggle-btn.lock { border-color: var(--red); color: var(--red); }
+.toggle-btn.lock:hover { background: var(--red); color: white; }
+.preorder-stats { margin-top: 24px; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--grey2); }
+.stat-name { font-size: 12px; color: var(--grey5); }
+.stat-count { font-family: var(--font-display); font-size: 20px; color: var(--accent); }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--grey2); padding: 80px 48px 40px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px; max-width: 1400px; margin: 0 auto; padding-bottom: 60px; border-bottom: 1px solid var(--grey2); }
+.footer-brand-section h3 { font-family: var(--font-display); font-size: 48px; letter-spacing: 0.15em; margin-bottom: 16px; }
+.footer-brand-section p { font-size: 14px; color: #bbb; line-height: 1.7; max-width: 280px; font-family: var(--font-serif); font-style: italic; }
+.footer-email { display: inline-block; margin-top: 20px; font-size: 13px; color: #bbb; letter-spacing: 0.1em; text-decoration: none; border-bottom: 1px solid #555; padding-bottom: 2px; transition: color .3s, border-color .3s; }
+.footer-email:hover { color: var(--accent); border-color: var(--accent); }
+.footer-col h4 { font-size: 10px; letter-spacing: 0.45em; text-transform: uppercase; color: #999; margin-bottom: 24px; }
+.footer-col ul { list-style: none; }
+.footer-col ul li { margin-bottom: 12px; }
+.footer-col ul li a { font-size: 14px; color: #bbb; text-decoration: none; transition: color .3s; }
+.footer-col ul li a:hover { color: var(--accent); }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 40px auto 0; }
+.footer-copy { font-size: 12px; color: #888; letter-spacing: 0.1em; }
+.footer-vintra { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: #888; }
+
+/* DESIGN PREVIEW NOTICE */
+.design-notice { background: var(--grey2); border-left: 2px solid var(--gold); padding: 16px 20px; margin-top: 4px; }
+.design-notice-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.design-notice-text { font-size: 11px; color: var(--grey4); line-height: 1.65; }
+
+/* STORY SECTION */
+.story-section { padding: 120px 48px; max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.2fr; gap: 100px; align-items: center; }
+.story-left { position: relative; }
+.story-label { font-size: 9px; letter-spacing: 0.55em; text-transform: uppercase; color: var(--grey4); margin-bottom: 20px; }
+.story-title { font-family: var(--font-display); font-size: clamp(56px, 8vw, 100px); letter-spacing: 0.1em; line-height: 0.9; color: white; margin-bottom: 0; }
+.story-title span { color: var(--accent); }
+.story-divider { width: 40px; height: 1px; background: var(--grey3); margin: 32px 0; }
+.story-tagline { font-family: var(--font-serif); font-style: italic; font-size: 18px; color: var(--grey4); line-height: 1.5; }
+.story-right p { font-size: 15px; color: #ccc; line-height: 1.9; margin-bottom: 24px; font-weight: 300; }
+.story-right p:last-child { margin-bottom: 0; }
+.story-right strong { color: white; font-weight: 600; }
+@media (max-width: 1024px) {
+  .story-section { grid-template-columns: 1fr; gap: 48px; padding: 80px 24px; }
+  .story-title { font-size: clamp(56px, 12vw, 80px); }
+}
+
+/* TOAST */
+.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--accent); color: black; padding: 14px 28px; font-size: 12px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; z-index: 9000; transition: transform .3s; clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%); }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* CURRENCY FLAG */
+.currency-bar { background: var(--grey2); padding: 10px 48px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; border-bottom: 1px solid var(--grey2); }
+.currency-bar label { font-size: 10px; letter-spacing: 0.25em; color: var(--grey4); text-transform: uppercase; }
+.currency-select { background: transparent; border: 1px solid var(--grey3); color: var(--grey5); padding: 4px 8px; font-family: var(--font-body); font-size: 11px; cursor: none; outline: none; }
+.currency-select option { background: var(--grey2); }
+
+/* REVEAL */
+.reveal { opacity: 0; transform: translateY(40px); transition: opacity .8s ease, transform .8s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 1024px) {
+  nav { padding: 20px 24px; }
+  .nav-links { display: none; }
+  .products-grid { grid-template-columns: repeat(2, 1fr); }
+  .other-brands-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .modal { grid-template-columns: 1fr; }
+  .section-header { padding: 60px 24px 32px; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .gamme-tabs { padding: 0 24px; }
+  .products-section { padding: 24px 24px 60px; }
+  .brands-section { padding: 60px 24px; }
+  .velox-hero-card { padding: 36px 32px; flex-direction: column; gap: 32px; }
+  .velox-hero-right { align-items: flex-start; }
+  .promo-banner { margin: 32px 24px 0; padding: 28px 28px; flex-direction: column; gap: 20px; }
+  .promo-right { flex-direction: column; gap: 16px; align-items: flex-start; }
+  .trust-bar { gap: 20px; padding: 16px 24px; }
+  footer { padding: 60px 24px 40px; }
+  body { cursor: auto; }
+  #cur, #cur-ring { display: none; }
+}
+@media (max-width: 640px) {
+  .products-grid { grid-template-columns: 1fr; }
+  .other-brands-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero-brand { font-size: clamp(80px, 24vw, 160px); }
+  .hero-counters { gap: 24px; }
+  .hero-counter .num { font-size: 36px; }
+  .cart-sidebar { width: 100%; }
+  .modal { max-width: 100%; }
+  .velox-hero-name { font-size: clamp(56px, 16vw, 90px); }
+  .trust-bar { gap: 12px; }
+  .trust-text { font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-letters">
+    <span class="accent" style="animation-delay:.1s">V</span>
+    <span style="animation-delay:.22s">I</span>
+    <span style="animation-delay:.34s">N</span>
+    <span style="animation-delay:.46s">T</span>
+    <span style="animation-delay:.58s">R</span>
+    <span style="animation-delay:.70s">A</span>
+  </div>
+  <div class="tagline">Creating brands that move.</div>
+  <div class="bar-wrap"><div class="bar"></div></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <span style="font-family:var(--font-display);font-size:26px;letter-spacing:0.2em;color:white">VINTRA</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#marques">Nos Marques</a></li>
+    <li><a href="#velox-section" style="color:var(--accent)">VELOX ↗</a></li>
+    <li><a href="#footer">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="admin-btn" onclick="openAdmin()" title="Admin">⚙</button>
+    <button class="cart-btn" onclick="toggleCart()">
+      Panier
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-orb"></div>
+  <div class="hero-content" id="heroContent">
+    <p class="hero-eyebrow" id="heroEyebrow">Cotonou, Bénin — Holding de marques</p>
+    <h1 class="hero-brand" id="heroBrand">
+      <span class="accent-v">V</span>INTRA
+      <div class="hero-shine"></div>
+    </h1>
+    <p class="hero-tagline" id="heroTagline">Creating brands that move.</p>
+    <div class="hero-counters" id="heroCounters">
+      <div class="hero-counter">
+        <span class="num" id="cnt1">0</span>
+        <span class="lbl">Marques</span>
+      </div>
+      <div class="hero-counter-divider"></div>
+      <div class="hero-counter">
+        <span class="num" id="cnt2">0</span>
+        <span class="lbl">Modèles</span>
+      </div>
+      <div class="hero-counter-divider"></div>
+      <div class="hero-counter">
+        <span class="num" id="cnt3" style="font-size:40px">🇧🇯</span>
+        <span class="lbl">Born in Bénin</span>
+      </div>
+    </div>
+    <div class="hero-cta" id="heroCta">
+      <button class="btn-primary" onclick="document.getElementById('marques').scrollIntoView({behavior:'smooth'})">Découvrir nos marques</button>
+      <button class="btn-secondary" onclick="document.getElementById('velox-section').scrollIntoView({behavior:'smooth'})">VELOX — Sneakers ↓</button>
+    </div>
+  </div>
+  <div class="hero-scroll" id="heroScroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- CURRENCY BAR -->
+<div class="currency-bar">
+  <label>Devise</label>
+  <select class="currency-select" id="globalCurrency" onchange="updateAllPrices()">
+    <option value="XOF">XOF – Franc CFA</option>
+    <option value="EUR">EUR – Euro</option>
+    <option value="USD">USD – Dollar</option>
+    <option value="GBP">GBP – Livre</option>
+    <option value="NGN">NGN – Naira</option>
+    <option value="GHS">GHS – Cedi</option>
+    <option value="MAD">MAD – Dirham</option>
+    <option value="ZAR">ZAR – Rand</option>
+    <option value="CAD">CAD – Dollar CA</option>
+  </select>
+</div>
+
+<!-- TRUST BADGES -->
+<div class="trust-bar">
+  <div class="trust-item"><span class="trust-icon">🔒</span><span class="trust-text">Paiement sécurisé</span></div>
+  <div class="trust-item"><span class="trust-icon">📦</span><span class="trust-text">Livraison au Bénin</span></div>
+  <div class="trust-item"><span class="trust-icon">📱</span><span class="trust-text">MTN & MOOV Money</span></div>
+  <div class="trust-item"><span class="trust-icon">🇧🇯</span><span class="trust-text">Born in Bénin</span></div>
+  <div class="trust-item"><span class="trust-icon">✅</span><span class="trust-text">Qualité garantie</span></div>
+</div>
+
+<!-- VINTRA TICKER -->
+<div class="vintra-bar">
+  <div class="vintra-track">
+    <div class="vintra-item"><span>VELOX</span><span class="dot"></span><span style="color:#555">Step Into Motion</span></div>
+    <div class="vintra-item"><span>KAFFEIN</span><span class="dot"></span><span style="color:#555">Fuel Your Hustle</span></div>
+    <div class="vintra-item"><span>GOOK</span><span class="dot"></span><span style="color:#555">Drive Beyond Limits</span></div>
+    <div class="vintra-item"><span>GREECO</span><span class="dot"></span><span style="color:#555">Grow Green, Live Clean</span></div>
+    <div class="vintra-item"><span>GIVES</span><span class="dot"></span><span style="color:#555">Escape the Ordinary</span></div>
+    <div class="vintra-item"><span>VELOX</span><span class="dot"></span><span style="color:#555">Step Into Motion</span></div>
+    <div class="vintra-item"><span>KAFFEIN</span><span class="dot"></span><span style="color:#555">Fuel Your Hustle</span></div>
+    <div class="vintra-item"><span>GOOK</span><span class="dot"></span><span style="color:#555">Drive Beyond Limits</span></div>
+    <div class="vintra-item"><span>GREECO</span><span class="dot"></span><span style="color:#555">Grow Green, Live Clean</span></div>
+    <div class="vintra-item"><span>GIVES</span><span class="dot"></span><span style="color:#555">Escape the Ordinary</span></div>
+  </div>
+</div>
+
+<!-- VINTRA BRANDS SECTION -->
+<section class="brands-section" id="marques">
+  <div class="reveal" style="margin-bottom:48px;">
+    <div class="section-label">VINTRA — Portfolio de marques</div>
+    <h2 class="section-title">Nos 5 Marques</h2>
+  </div>
+
+  <!-- VELOX HERO CARD -->
+  <div class="velox-hero-card reveal" onclick="document.getElementById('velox-section').scrollIntoView({behavior:'smooth'})">
+    <div class="velox-hero-left">
+      <div class="velox-hero-tag">🔥 Première marque active — Disponible maintenant</div>
+      <div class="velox-hero-name">VELOX</div>
+      <div class="velox-hero-slogan">"Step Into Motion."</div>
+      <div class="velox-hero-stats">
+        <div class="velox-stat"><span class="num">48</span><span class="lbl">Modèles</span></div>
+        <div class="velox-stat"><span class="num">8</span><span class="lbl">Collections</span></div>
+        <div class="velox-stat"><span class="num">22k</span><span class="lbl">XOF dès</span></div>
+      </div>
+    </div>
+    <div class="velox-hero-right">
+      <button class="velox-cta-big">Explorer VELOX →</button>
+      <div class="velox-active-badge">
+        <div class="velox-active-dot"></div>
+        <span class="velox-active-text">En vente maintenant</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 AUTRES MARQUES -->
+  <div class="other-brands-grid reveal">
+    <div class="brand-card" style="border-top: 2px solid #4488ff">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-name">KAFFEIN</div>
+      <div class="brand-cat">Energy Drinks</div>
+      <div class="brand-slogan">"Fuel Your Hustle."</div>
+      <div class="brand-status"><span class="status-dot" style="background:#4488ff"></span>En développement</div>
+    </div>
+    <div class="brand-card" style="border-top: 2px solid #cc3333">
+      <div class="brand-icon">🏎</div>
+      <div class="brand-name">GOOK</div>
+      <div class="brand-cat">Automobile</div>
+      <div class="brand-slogan">"Drive Beyond Limits."</div>
+      <div class="brand-status"><span class="status-dot" style="background:#cc3333"></span>En développement</div>
+    </div>
+    <div class="brand-card" style="border-top: 2px solid #44aa66">
+      <div class="brand-icon">🌿</div>
+      <div class="brand-name">GREECO</div>
+      <div class="brand-cat">Écologie</div>
+      <div class="brand-slogan">"Grow Green, Live Clean."</div>
+      <div class="brand-status"><span class="status-dot" style="background:#44aa66"></span>En développement</div>
+    </div>
+    <div class="brand-card" style="border-top: 2px solid #d4a843">
+      <div class="brand-icon">✈️</div>
+      <div class="brand-name">GIVES</div>
+      <div class="brand-cat">Travel</div>
+      <div class="brand-slogan">"Escape the Ordinary."</div>
+      <div class="brand-status"><span class="status-dot" style="background:#d4a843"></span>En développement</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROMO BANNER -->
+<div class="promo-banner reveal">
+  <div class="promo-left">
+    <span class="promo-tag">🏃 Lancement officiel — Collection Runner</span>
+    <div class="promo-title">VELOX RUNNER</div>
+    <div class="promo-sub">6 modèles inspirés des rues de Cotonou — disponibles maintenant</div>
+  </div>
+  <div class="promo-right">
+    <div class="promo-price">
+      <div class="from">À partir de</div>
+      <div class="amount">35 000 XOF</div>
+    </div>
+    <button class="btn-primary" onclick="document.getElementById('catalogue').scrollIntoView({behavior:'smooth'})">Voir la collection</button>
+  </div>
+</div>
+
+<!-- VELOX BRAND DIVIDER -->
+<div id="velox-section" style="border-top:1px solid var(--grey2); padding:60px 48px 0; max-width:1400px; margin:0 auto;">
+  <div class="reveal" style="display:flex; align-items:center; gap:20px; margin-bottom:0;">
+    <img src="https://lh3.googleusercontent.com/pw/AP1GczOYNfMWM0r678hlrPQCh0QS-oW-35PGggfU3Sm42PYMKE88hGIkqENFLq_JR1nE_OLdDQZlEfvNr_fTX-Fua0brmJChO4U5VGSKuy487isZpvpEcw=w200-h200" alt="VELOX" style="width:52px;height:52px;object-fit:contain;filter:brightness(0) invert(1)">
+    <div>
+      <div style="font-size:9px;letter-spacing:0.5em;text-transform:uppercase;color:var(--grey4);margin-bottom:4px">Marque fille VINTRA · Première marque active</div>
+      <div style="font-family:var(--font-display);font-size:48px;letter-spacing:0.15em;color:white;line-height:1">VELOX <span style="color:var(--accent);font-size:18px;letter-spacing:0.3em">— Step Into Motion.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- STORY SECTION -->
+<section>
+  <div class="story-section">
+    <div class="story-left reveal">
+      <div class="story-label">Notre Histoire</div>
+      <h2 class="story-title"><span>V</span>ELOX</h2>
+      <div class="story-divider"></div>
+      <p class="story-tagline">Née dans les rues vibrantes de Cotonou.</p>
+    </div>
+    <div class="story-right reveal">
+      <p>Chez VELOX, tout commence par un pas. <strong>Premier pas, première course, premier style.</strong> Née dans les rues vibrantes de Cotonou, notre marque accompagne ceux qui bougent, qui osent, qui avancent.</p>
+      <p>Que ce soit sur les routes animées de la ville, dans les marchés colorés ou sur les plages au coucher du soleil — <strong>Runner, streetwear ou randonnée :</strong> nous sommes à vos côtés à chaque foulée.</p>
+      <p>Chaque sneaker VELOX est conçue pour ceux qui refusent de rester immobiles. <strong>Parce que chaque pas compte, et chaque mouvement construit votre chemin.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- CATALOGUE -->
+<section id="catalogue">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-label">Collection VELOX</div>
+      <h2 class="section-title">Nos Gammes</h2>
+    </div>
+    <div class="section-count" id="productCounter">48</div>
+  </div>
+
+  <!-- GAMME TABS -->
+  <div class="gamme-tabs" id="gammeTabs"></div>
+
+  <!-- PRODUCTS -->
+  <div class="products-section">
+    <div class="products-grid" id="productsGrid"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div class="footer-grid">
+    <div class="footer-brand-section reveal">
+      <div style="font-size:9px;letter-spacing:0.45em;text-transform:uppercase;color:var(--grey4);margin-bottom:12px">Holding de marques</div>
+      <h3 style="font-family:var(--font-display);font-size:48px;letter-spacing:0.2em;margin-bottom:16px">VINTRA</h3>
+      <p style="font-family:var(--font-serif);font-style:italic;font-size:13px;color:var(--grey4);line-height:1.7;max-width:280px">Creating brands that move. Né à Cotonou, Bénin. Architecture invisible derrière 5 marques qui avancent.</p>
+      <a href="/cdn-cgi/l/email-protection#5127383f2523307f333b11363c30383d7f323e3c" class="footer-email"><span class="__cf_email__" data-cfemail="06706f6872746728646c46616b676f6a2865696b">[email&#160;protected]</span></a>
+    </div>
+    <div class="footer-col reveal">
+      <h4>VELOX — Sneakers</h4>
+      <ul>
+        <li><a href="#">Runner</a></li>
+        <li><a href="#">Street</a></li>
+        <li><a href="#">Hiker</a></li>
+        <li><a href="#">Slip</a></li>
+        <li><a href="#">x Artist</a></li>
+        <li><a href="#">Retro</a></li>
+        <li><a href="#">Neon Pack</a></li>
+        <li><a href="#">Midnight</a></li>
+      </ul>
+    </div>
+    <div class="footer-col reveal">
+      <h4>VINTRA Portfolio</h4>
+      <ul>
+        <li><a href="#" style="color:var(--accent)">VELOX ✓ Actif</a></li>
+        <li><a href="#">KAFFEIN</a></li>
+        <li><a href="#">GOOK</a></li>
+        <li><a href="#">GREECO</a></li>
+        <li><a href="#">GIVES</a></li>
+      </ul>
+    </div>
+    <div class="footer-col reveal">
+      <h4>Suivre</h4>
+      <ul>
+        <li><a href="#">YouTube — VINTRA</a></li>
+        <li><a href="#">TikTok @vintra_official</a></li>
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 VINTRA. Tous droits réservés. VELOX est une marque de VINTRA.</span>
+    <span class="footer-vintra">Born in Cotonou, Bénin. 🇧🇯</span>
+  </div>
+</footer>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalIfOutside(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <!-- VIEWER -->
+    <div class="viewer">
+      <div class="viewer-main" id="viewerMain">
+        <div class="viewer-img" id="viewerImg"></div>
+        <div class="viewer-label" id="viewerLabel">Profil</div>
+      </div>
+      <div class="viewer-angles" id="viewerAngles"></div>
+    </div>
+    <!-- INFO -->
+    <div class="modal-info">
+      <div class="modal-brand" id="modalBrand">VELOX</div>
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-tagline" id="modalTagline">By VELOX — Step Into Motion</div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-price-wrap">
+        <div class="modal-price" id="modalPrice"></div>
+        <select class="modal-currency-select" id="modalCurrency" onchange="updateModalPrice()">
+          <option value="XOF">XOF</option>
+          <option value="EUR">EUR</option>
+          <option value="USD">USD</option>
+          <option value="GBP">GBP</option>
+          <option value="NGN">NGN</option>
+          <option value="GHS">GHS</option>
+          <option value="MAD">MAD</option>
+          <option value="ZAR">ZAR</option>
+          <option value="CAD">CAD</option>
+        </select>
+      </div>
+      <div>
+        <div class="size-label">Pointure</div>
+        <div class="sizes" id="modalSizes"></div>
+      </div>
+      <div id="modalActionArea"></div>
+      <div class="preorder-section">
+        <div class="preorder-title">📧 Être notifié — Précommande</div>
+        <div class="preorder-row">
+          <input type="email" placeholder="votre@email.com" id="preorderEmail">
+          <button onclick="submitPreorder()">→</button>
+        </div>
+      </div>
+      <div class="design-notice">
+        <div class="design-notice-title">🔏 Design Preview Notice</div>
+        <div class="design-notice-text">Le modèle présenté représente le design final et la silhouette de la sneaker. Pour protéger l'authenticité de notre marque, la signature officielle VELOX est appliquée lors de la phase finale de production. Votre commande sera livrée avec le branding complet tel que conçu par l'équipe design — garantissant que chaque paire est un produit VELOX authentique, fabriqué et finalisé exclusivement pour vous.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CART SIDEBAR -->
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <div class="cart-title">Panier</div>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">Votre panier est vide</div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-price" id="cartTotal">0 XOF</span>
+    </div>
+    <button class="checkout-btn" onclick="checkout()">Commander — Payer</button>
+    <div class="payment-logos">
+      <span class="payment-logo">MOOV</span>
+      <span class="payment-logo">MTN</span>
+      <span class="payment-logo">VISA</span>
+      <span class="payment-logo">MASTERCARD</span>
+      <span class="payment-logo">PAYPAL</span>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-overlay" id="adminOverlay" onclick="closeAdminIfOutside(event)">
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-header">
+      <div class="admin-title">⚙ VELOX ADMIN</div>
+      <button class="admin-close" onclick="closeAdmin()">✕</button>
+    </div>
+    <!-- LOGIN -->
+    <div class="admin-login" id="adminLogin">
+      <h3>Accès Admin</h3>
+      <input type="password" class="admin-input" id="adminPassword" placeholder="Mot de passe" onkeypress="if(event.key==='Enter')adminLogin()">
+      <button class="admin-submit" onclick="adminLogin()">Connexion</button>
+    </div>
+    <!-- DASHBOARD -->
+    <div class="admin-content" id="adminDashboard">
+      <div style="padding-bottom:16px">
+        <div class="admin-section-title">Gestion des Gammes</div>
+        <div id="adminGammeList"></div>
+      </div>
+      <div>
+        <div class="admin-section-title">Précommandes reçues</div>
+        <div id="preorderStats"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkoutOverlay" onclick="closeCheckoutIfOutside(event)" style="z-index:1100">
+  <div style="background:var(--grey);width:460px;max-width:95vw;border:1px solid var(--grey3);position:relative;max-height:90vh;overflow-y:auto;">
+    <button onclick="closeCheckout()" style="position:absolute;top:16px;right:20px;background:none;border:none;color:var(--grey5);font-size:20px;cursor:none;">✕</button>
+    <div style="padding:32px;">
+
+      <!-- HEADER -->
+      <div style="font-size:9px;letter-spacing:0.45em;text-transform:uppercase;color:var(--grey4);margin-bottom:6px">Finaliser la commande</div>
+      <div style="font-family:var(--font-display);font-size:28px;letter-spacing:0.12em;margin-bottom:24px;">PAIEMENT</div>
+
+      <!-- ORDER SUMMARY -->
+      <div style="background:var(--grey2);padding:16px;margin-bottom:24px;">
+        <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--grey4);margin-bottom:12px;">Récapitulatif</div>
+        <div id="checkoutSummary"></div>
+        <div style="border-top:1px solid var(--grey3);margin-top:12px;padding-top:12px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--grey4)">Total</span>
+          <span id="checkoutTotal" style="font-family:var(--font-display);font-size:24px;color:var(--accent)"></span>
+        </div>
+      </div>
+
+      <!-- CUSTOMER INFO -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--grey4);margin-bottom:12px;">Vos informations</div>
+        <input id="co-name" type="text" placeholder="Prénom et Nom *" style="width:100%;background:var(--grey2);border:1px solid var(--grey3);color:white;padding:12px 14px;font-family:var(--font-body);font-size:13px;outline:none;margin-bottom:8px;display:block;">
+        <input id="co-email" type="email" placeholder="Adresse email *" style="width:100%;background:var(--grey2);border:1px solid var(--grey3);color:white;padding:12px 14px;font-family:var(--font-body);font-size:13px;outline:none;margin-bottom:8px;display:block;">
+        <input id="co-phone" type="tel" placeholder="Téléphone (avec indicatif ex: +22961...)" style="width:100%;background:var(--grey2);border:1px solid var(--grey3);color:white;padding:12px 14px;font-family:var(--font-body);font-size:13px;outline:none;display:block;">
+      </div>
+
+      <!-- PAYMENT METHOD -->
+      <div style="margin-bottom:24px;">
+        <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--grey4);margin-bottom:12px;">Mode de paiement</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button id="btn-kkiapay" onclick="setPayMethod('kkiapay')"
+            style="padding:16px 12px;background:var(--grey2);border:2px solid var(--grey3);color:white;cursor:none;transition:all .25s;text-align:left;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;margin-bottom:4px;">📱 Mobile Money</div>
+            <div style="font-size:10px;color:var(--grey4);">MTN · MOOV · Bénin</div>
+          </button>
+          <button id="btn-flutterwave" onclick="setPayMethod('flutterwave')"
+            style="padding:16px 12px;background:var(--grey2);border:2px solid var(--grey3);color:white;cursor:none;transition:all .25s;text-align:left;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;margin-bottom:4px;">💳 Carte / Intl</div>
+            <div style="font-size:10px;color:var(--grey4);">Visa · Mastercard · +34 pays</div>
+          </button>
+        </div>
+        <div id="pay-method-note" style="font-size:10px;color:var(--grey4);margin-top:8px;letter-spacing:0.05em;"></div>
+      </div>
+
+      <!-- PAY BUTTON -->
+      <button onclick="processPayment()"
+        style="width:100%;background:var(--accent);color:black;padding:18px;font-family:var(--font-body);font-size:12px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;border:none;cursor:none;transition:all .3s;">
+        Confirmer et Payer →
+      </button>
+
+      <div style="margin-top:12px;text-align:center;font-size:10px;color:var(--grey3);letter-spacing:0.1em;">
+        🔒 Paiement 100% sécurisé · VELOX by VINTRA
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ==================== DATA ====================
+const RATES = { XOF:1, EUR:0.00152, USD:0.00165, GBP:0.0013, NGN:2.48, GHS:0.025, MAD:0.016, ZAR:0.031, CAD:0.00225 };
+const SYMBOLS = { XOF:'FCFA', EUR:'€', USD:'$', GBP:'£', NGN:'₦', GHS:'GH₵', MAD:'MAD', ZAR:'R', CAD:'CA$' };
+const BASE_PRICES_XOF = { runner:35000, street:32000, hiker:42000, slip:22000, artist:55000, retro:48000, neon:45000, midnight:58000 };
+
+const GAMMES = [
+  { id:'runner', name:'Runner', emoji:'👟', locked:false, limited:false, basePrice: 35000, desc:'La gamme qui court. Inspirée des rues de Cotonou.' },
+  { id:'street', name:'Street', emoji:'🏙️', locked:true, limited:false, basePrice: 32000, desc:'La culture urbaine béninoise au pied.' },
+  { id:'hiker', name:'Hiker', emoji:'🥾', locked:true, limited:false, basePrice: 42000, desc:'Pour explorer le Bénin. Du Pendjari au Tanéka.' },
+  { id:'slip', name:'Slip', emoji:'🩴', locked:true, limited:false, basePrice: 22000, desc:'Le confort au quotidien, à chaque pas.' },
+  { id:'artist', name:'x Artist', emoji:'🎨', locked:true, limited:true, basePrice: 55000, desc:'VELOX x Culture béninoise. Éditions limitées.' },
+  { id:'retro', name:'Retro', emoji:'📼', locked:true, limited:true, basePrice: 48000, desc:'La nostalgie 80s/90s revisitée.' },
+  { id:'neon', name:'Neon Pack', emoji:'🌈', locked:true, limited:true, basePrice: 45000, desc:'La nuit urbaine. Visible. Vibrant.' },
+  { id:'midnight', name:'Midnight', emoji:'🌙', locked:true, limited:true, basePrice: 58000, desc:'L\'élégance sombre. Pour les grands événements.' }
+];
+
+const PRODUCTS_DATA = {
+  runner: [
+    { id:'rn01', code:'RN-01', name:'"Le Bitume"', desc:'Noir matte, semelle blanche, détails vert néon. L\'énergie des rues de Cotonou.', img:'https://lh3.googleusercontent.com/pw/AP1GczOI_pvjDEvbfElKeHbdbQXdS5WaT6pQk2TBpxIAtSNcR6ik7E3m_r5jy3jSWJmsQWxw6MpxNtN03mj8lTCmr0VG7gf_WYkyW4FDnz3JB3fP0MMUGw=w1200-h1200' },
+    { id:'rn02', code:'RN-02', name:'"Le Sable"', desc:'Beige mesh, détails orange. L\'esprit de Grand-Popo.', img:'https://lh3.googleusercontent.com/pw/AP1GczMtMUDdB13HoxG0jeZcbe7doSeRtj97El_x39Al4IUT5wAz4mn7tTk4EKFchlnB7P7tARpIVPtf3qaoYHxebRxNua9-D8u8Or_ctwRs--SjZGRk2g=w1200-h1200' },
+    { id:'rn03', code:'RN-03', name:'"Le Marché"', desc:'Gris mesh, cuir marron, accents rouges. L\'âme du Dantokpa.', img:'https://lh3.googleusercontent.com/pw/AP1GczNItlYTG8FLaTX8naIP0bXhU20b1m5I4TBEslhbCDz45SU3wy_wY9niom9wlb9epX03YLWBiImBbuSMY4AXPGWTRbzvZGBLPU98jeph--_BzAnjSg=w1200-h1200' },
+    { id:'rn04', code:'RN-04', name:'"Le Campus Run"', desc:'Blanc mesh, détails bleus. L\'énergie de l\'UAC.', img:'https://lh3.googleusercontent.com/pw/AP1GczMesCJ7p45nfOE6563utL-JOXjl6NkV6_QYeCYq_4uPnp02kYwRV9mhxaO3I67eOwEz4GCAfwmqQSKkwx6koeA_bMHta85QJcsQvT_FfLQLYHlDJA=w1200-h1200' },
+    { id:'rn05', code:'RN-05', name:'"Le Lagune Run"', desc:'Bleu clair, détails argent. La sérénité de la lagune.', img:'https://lh3.googleusercontent.com/pw/AP1GczNT1sXTMg-PcdBD0im1YfZZ-_r3lfs5bEg6kgXxP1_Y5QvvUGzwg28eHh4_rf_MHmY4dYA_pRxXNuWiYCAw_IBu8G1AQZJe-n3Oy4-stXw6gAQNSQ=w1200-h1200' },
+    { id:'rn06', code:'RN-06', name:'"Le Bénin Runner"', desc:'Vert, jaune, rouge. Les couleurs du drapeau. Édition spéciale.', img:'https://lh3.googleusercontent.com/pw/AP1GczOnKmbq-gc879zo7lWLEt8NCVbbKrhnfA-luLf-BiUK7OnTmnZljXiviWVr87-NWuXu0Pc3GZzNWrXHb2K96nUetXLBLJgJ8e_Ujd6oiGvnNRtMeg=w1200-h1200', gold:true }
+  ],
+  street: [
+    { id:'st01', code:'ST-01', name:'"Le Tôlier"', desc:'Noir matte, détails vert néon. L\'énergie des rues de Cotonou.', img:'https://lh3.googleusercontent.com/pw/AP1GczPy42IPhdUlNz843MFdZjdHldWqR4HLO91WeQ4hkpN2lxJQS5wxSqXIvCi1X1bTsg23bSc6nRkm-LeJQR_J8cxbXjM2kApoX-EGxX6x5doJnzpZHw=w1200-h1200' },
+    { id:'st02', code:'ST-02', name:'"Le Campus"', desc:'Blanc, semelle noire, détails argent. Style universitaire.', img:'https://lh3.googleusercontent.com/pw/AP1GczNh2S8PKfCwk2bRQvYFLQtJjgF1t25JWPDoBcQ3rrYq07enr6ju40YJDrXTBjawbZRWQtJuWTzJR29-a2IQDFejFJNPLL8WsEbgerlRknYXjwxFgA=w1200-h1200' },
+    { id:'st03', code:'ST-03', name:'"Le Dantokpa"', desc:'Tissu wax multicolore. La culture béninoise en sneaker.', img:'https://lh3.googleusercontent.com/pw/AP1GczOGXCfJxzlrdgdh4iX89mpelyr171bkeniNCcgpDwWdQzxkbOd-IVbsGXgFDHRGW6ahDN9-W-KxwmL_dcg7QBPko4Jzw7iCCSs5CbYgkx60m3Se1w=w1200-h1200' },
+    { id:'st04', code:'ST-04', name:'"Le Lagune"', desc:'Bleu clair, détails argent. L\'atmosphère de la lagune.', img:'https://lh3.googleusercontent.com/pw/AP1GczNUEJ5wxu5FQ2Kf20sqLPOBK-0g6Y6uwzs2IQHoPJeT0ovymDJIN0TbwvPsq-zNxq3alKqiY1PZfpZ-sFegITufTw2yUeocjJfqkMiQc7baDtg7nQ=w1200-h1200' },
+    { id:'st05', code:'ST-05', name:'"Le Zongo"', desc:'Vert, jaune, noir. L\'énergie du quartier.', img:'https://lh3.googleusercontent.com/pw/AP1GczPc7kV2e7xJch6FHjdNAJVzex3kLFAzYayTBuUcIxzPKGpQUKOG8GQZmy5B96SOTdMTEPv2Pc3FAn-0aaw6amO7Mugan6hMMV20AdlJhWrBawUkmw=w1200-h1200' },
+    { id:'st06', code:'ST-06', name:'"Le Bénin Pride"', desc:'Blanc + couleurs nationales. La fierté béninoise.', img:'https://lh3.googleusercontent.com/pw/AP1GczN5zuK4BfBMVM9IA13iut33Dpy_-Hj923_j4ryONd7ny3FBlaHzc1WqPVDny0dbLmRJLe23iEgGFY8PsNaSlqbQ8nDR_pbzGIi8aaQT29CKKxAQIA=w1200-h1200', gold:true }
+  ],
+  hiker: [
+    { id:'hk01', code:'HK-01', name:'"Le Pendjari"', desc:'Beige suède, accents orange. Pour explorer le parc national.', img:'https://lh3.googleusercontent.com/pw/AP1GczP2xhGe5GuIFjWfy8gs5uj88y7atW5fzLSNPDqI_GtrDVllM_n3I1xUJD8ckNHYUpw33cXRZsinsRXV16VoYjzaKZIciArgBIFWR5alVBJ4_T7UQQ=w1200-h1200' },
+    { id:'hk02', code:'HK-02', name:'"Le Savalou"', desc:'Vert forêt mesh, cuir beige. Les collines de Savalou.', img:'https://lh3.googleusercontent.com/pw/AP1GczPA4I1wHxJis74YlVeitD4TLur_JCV-8h3fczr5CwW7ldjgVDkBVY7aLFc15tiITtQ9-L5oaAWpdoCV-Pu6CZEpgM-q5VfzRe_qrrGhov2nZ2M6Cg=w1200-h1200' },
+    { id:'hk03', code:'HK-03', name:'"Le Tanéka"', desc:'Terracotta suède. L\'authenticité des villages.', img:'https://lh3.googleusercontent.com/pw/AP1GczNFaRwX3q3C-SQ7rP5dmozIZSS3--qu_YXn8RkJWAY44FYuIDuHugK5REQI4zlDTIKGiugpZP89z2TH4lpoVrM5LUdbgbRD9rwUtLLNi7qOiN1JVA=w1200-h1200' },
+    { id:'hk04', code:'HK-04', name:'"Le W"', desc:'Kaki ballistic, détails orange fluo. Le parc W.', img:'https://lh3.googleusercontent.com/pw/AP1GczNecnpz0t6ZnSIZ7dOIHJ4WGwglztSC24wXi8q2_gsSQElMGwIpyb4arfRIHhN7kmZSHa_P0X1fr9xnB374awtxuvRg4XsuaLwl7E8LuyN3X_aHWw=w1200-h1200' },
+    { id:'hk05', code:'HK-05', name:'"Le Djougou"', desc:'Gris mesh, cuir beige. La route du coton.', img:'https://lh3.googleusercontent.com/pw/AP1GczPqJ2aV7sX37VUYJyPxrQk8_jO_qcSrs_74QFjDET06VeK8ZuL59qibmvIiVY6dj5ZcPmI4jTX4WJJa1Brl0OLulZ2DcX8UgyWzaW7W422QbSqvRQ=w1200-h1200' },
+    { id:'hk06', code:'HK-06', name:'"Le Somba"', desc:'Noir suède, motifs géométriques traditionnels. Les tata Somba.', img:'https://lh3.googleusercontent.com/pw/AP1GczPY2Ge8wrKWciSb0KlRSIeyWQ8xCAIVPeN1YjEbg6TP-n06HKEGyuHZHtCpygaGAK7N2HzC0xq6oEXualDe_5EBme-LQK16CGXj3Iv3q6xxurI3sQ=w1200-h1200', gold:true }
+  ],
+  slip: [
+    { id:'sl01', code:'SL-01', name:'"Le Fâ"', desc:'Gris clair mesh, semelle blanche. Le confort quotidien.', img:'https://lh3.googleusercontent.com/pw/AP1GczOaOQJPEwylw7WzKKapm5WtgtTdt0nNgELKbd9fsxAX_B13LGk9J3LtvKhl-FZAFS3Rt1tCNenwCo7Y0zEhzCCt_feqmIWJUp0LoSIUVsbfHNVcrQ=w1200-h1200' },
+    { id:'sl02', code:'SL-02', name:'"Le Plage"', desc:'Bleu clair, séchage rapide. Pour Grand-Popo.', img:'https://lh3.googleusercontent.com/pw/AP1GczOmIUv38J4G6Th4dUMW7R5kmt6XD8BusiNJYKjJ7KZcj-1OkJBfdtW6V5Hx3DN4clk3mb70OBA1zqalVdt5UVvZ-RlnSbhupG-TVQOE_eUhecimZg=w1200-h1200' },
+    { id:'sl03', code:'SL-03', name:'"Le Maquis"', desc:'Noir faux cuir, semelle noire. Soirées élégantes.', img:'https://lh3.googleusercontent.com/pw/AP1GczMldPMG5qfZQnf-L7fl7QwN2zmyLyGXDNyLHBvl7KGMQGNFJsSxzlMv1UOKJVHCyuXDTCRBHDYp9PB1mZcire4bDNSyF2AgB_Bk5Rx5W6SOW6B2ZA=w1200-h1200' },
+    { id:'sl04', code:'SL-04', name:'"Le Voyage"', desc:'Beige flexible. Pour tous vos trajets.', img:'https://lh3.googleusercontent.com/pw/AP1GczMmDNpke8jKsfFQXixFp20vdODN9W82_6T_jlxFlUQ_WiH5kXCp7HK8TXgV0YJiMinRY6sE7HhgQMyLO1mF2k-QxoNKKq6gfUer5fT28g1HENu0mg=w1200-h1200' },
+    { id:'sl05', code:'SL-05', name:'"Le Mosquée"', desc:'Bleu marine, sobre et discret.', img:'https://lh3.googleusercontent.com/pw/AP1GczNm9WWicxYerqybymfVgVvVHdLZO3slif1TWyTmb1OJ8oYvdGwup8BfRBujIKJG_PfBynnXqXsxYcYCUU-A8tUPRfyEvqXcEijPiR6cwJ4YM65lcQ=w1200-h1200' },
+    { id:'sl06', code:'SL-06', name:'"Le Cocotier"', desc:'Vert clair ultra-léger. La légèreté tropicale.', img:'https://lh3.googleusercontent.com/pw/AP1GczPRrowJfyuvdaAAasFqrjRIg3wKAxRs5UD7p_6T8Y9MUY6Xi4YSnx7n4V9bKxLKYjSAyXCAEkajlMB3zgC2uM4ZrOCuuV8IKVwBeBvniR5FpjKCQQ=w1200-h1200', gold:true }
+  ],
+  artist: [
+    { id:'xa01', code:'XA-01', name:'"x Gbaga"', desc:'Motifs sculptés laser inspirés de l\'art Gbaga.', img:'https://lh3.googleusercontent.com/pw/AP1GczNbAGxKLZ0V7rUFwWkyKxzAKuDYtVDVu6q75FDbLU2wZQE0naMTfADAFQbaIVDmGN2iO41POLDZ63nTBcV3O6RlfdSq8WRHblnxXRKLS8DKpTe4cw=w1200-h1200' },
+    { id:'xa02', code:'XA-02', name:'"x Zinsou"', desc:'Blanc + inserts art contemporain. Fondation Zinsou.', img:'https://lh3.googleusercontent.com/pw/AP1GczOrQqVVIO2sMAW051vRpi9eiQpo6tUiAJuQuKhLpuhGQiSzFtP_kXMt1Nz4vD9pKp13DVuuMU9KKs5TjnlIQ0WN9HbzaXxw3ABsgIr02EEHyZ_-mQ=w1200-h1200' },
+    { id:'xa03', code:'XA-03', name:'"x Vodoun"', desc:'Symboles vèvè brodés. La spiritualité béninoise.', img:'https://lh3.googleusercontent.com/pw/AP1GczOBtBIutzhfS3RFfxnFRGa6BClLT6-OgQ0zeikANFGRd7sichiVovoZMuTel9lPiaH8WypIlSslbRPdYJpVASkjXDslDgnl_RAwveWvEX_FbV-wkQ=w1200-h1200' },
+    { id:'xa04', code:'XA-04', name:'"x Graffiti"', desc:'Canvas blanc, graffiti colorés. L\'art de rue.', img:'https://lh3.googleusercontent.com/pw/AP1GczP0ZUhQd7WMoQuzlvRgY13UMslpQiP-sbxQLcFkdJrV5vHTxrhZnP6A3pyQnfYsBIOA8KZtkYAsOhFvrq2dFLgjisnN6Xa5PAgruCfAdpA-nhKA_w=w1200-h1200' },
+    { id:'xa05', code:'XA-05', name:'"x Wax"', desc:'Tissu wax patchwork. La mode africaine.', img:'https://lh3.googleusercontent.com/pw/AP1GczOhr9TjSiKIH7fyrU_gjij6sg7BwD4PC7u-CErGjcjOJ81LS00JeoQZL3XSRNNESeVpvMnlHMH-ssFCCTpmW5uqhAn5-6gIqZZVB_lKi9W48rrMwA=w1200-h1200' },
+    { id:'xa06', code:'XA-06', name:'"x Métal"', desc:'Cuir noir, inserts métal brossé. L\'artisanat industriel.', img:'https://lh3.googleusercontent.com/pw/AP1GczM3P6ebVaUqiE-epU2THfMsdNohpz75yu7X0DVJWxlfqfbIE5FCQiLm7eXodjfWduPeto0XimSlZ_pNiWmbyznbzOG1EfT2E0eDOdbvgNb62WU_jg=w1200-h1200', gold:true }
+  ],
+  retro: [
+    { id:'rt01', code:'RT-01', name:'"90s Rave"', desc:'Patterns psychédéliques violets. L\'âme des raves 90s.', img:'https://lh3.googleusercontent.com/pw/AP1GczNA8dbVVXry59k_tkBe6CeF2w8nuMzig8rfWoHrRtljgEYdErpAuW9RbHT1kuqLqSurEGIeEKWYnka8zQ4j6NJtRoU_kXm2CcfTwlMvEh_DIMSkqg=w1200-h1200' },
+    { id:'rt02', code:'RT-02', name:'"Old School"', desc:'Blanc + rouge. Le basket vintage.', img:'https://lh3.googleusercontent.com/pw/AP1GczOXaWF5x3xPB4B0c5hkG88Mi1E6Tjw3NIx1Zh2W7B4V3BIFShq0E_cYHBsHsBZZsaO8zrFxRKnhcUCEssXmJbX9miuDW9p9lbqW2xZEnjZnJvk59A=w1200-h1200' },
+    { id:'rt03', code:'RT-03', name:'"Funk"', desc:'Orange-jaune, suède marron. Les années 70 funk.', img:'https://lh3.googleusercontent.com/pw/AP1GczPpJvS-KW2dTgtlXZW2J2WoTdsCyE3RdAIieV4wt1zwqpoFRhHa_WsAfLXuFqWbLZVpqIAFz1sTjZoc2nU6cFYcj8qjO2EE_EhAqUrET94wNz_1og=w1200-h1200' },
+    { id:'rt04', code:'RT-04', name:'"Cassette"', desc:'Imprimé cassettes audio partout. La nostalgie 90s.', img:'https://lh3.googleusercontent.com/pw/AP1GczOfOUT2iYb6WIjK4ag_ewxHjWdoJdOmCzke4BN5_-nEyFTKLgoSRCEcM8GXTPrd0tfM2yOmOcFj99Gc5W5hphzUDV3dPTvpHnHuL5gZK6-_MbEddw=w1200-h1200' },
+    { id:'rt05', code:'RT-05', name:'"Arcade"', desc:'Pixels 8-bit. Les salles d\'arcade 80s.', img:'https://lh3.googleusercontent.com/pw/AP1GczO4p0i6PNzkiNvyf1M6YPaPOnAoT854VAovJtuGG8kM0yTd1bIIso-ojrzsTN2tfQV0bvAnN2C8-CvEIdXtaTEQOKrBikwUZpFVEdjO68LN6g2Jag=w1200-h1200' },
+    { id:'rt06', code:'RT-06', name:'"Walkman"', desc:'Noir cuir, détails argent. Le Walkman original.', img:'https://lh3.googleusercontent.com/pw/AP1GczM7LBqw7ikcdDz7t7GQqPZcKU5H8Jrt0KDzod2VMf18d-1q20PCrLkdTqc6WRrPS578OeFc-G3MKnbIOqHe6K0St8lXjltsEdV0NtfnxPiaU7yT2A=w1200-h1200', gold:true }
+  ],
+  neon: [
+    { id:'np01', code:'NP-01', name:'"Zémidjan Night"', desc:'Bandes réfléchissantes neon jaune. Sécurité nocturne.', img:'https://lh3.googleusercontent.com/pw/AP1GczMZyx4TPh1MSS93_RHeEZHnd92xDyum4B8sVW8hU_zVum-lRDNEcepKTvvc6PZo-tjhYyr3Zc4GfzpP5dpmYnWKptWH860q1dZbKHLzrWF97T2m2Q=w1200-h1200' },
+    { id:'np02', code:'NP-02', name:'"Festival"', desc:'Blanc + flammes fluo. UV-reactive pour les festivals.', img:'https://lh3.googleusercontent.com/pw/AP1GczMHxDZ1w9bpJZLDrzkJNpAd58P3JxyHhnZleuY3Irt1P-70UhW2eJIIWw_r98AvC81R_NH09gwa01e13IuY-E-FEh7Shozlt3R-ft0YtzeMHOiG-Q=w1200-h1200' },
+    { id:'np03', code:'NP-03', name:'"Runner Night"', desc:'Noir + vert réfléchissant. Pour courir la nuit.', img:'https://lh3.googleusercontent.com/pw/AP1GczP_gu3QIhJlRLkjA-N6ak832BKrhIaFlyB3xEGLzVNk-vqCDxOHclyljlATk5zWZ7pxjty080spK6WHexOaKKdU8LLepBvhCwwzINgHRaIRJlsTlg=w1200-h1200' },
+    { id:'np04', code:'NP-04', name:'"Urban Glow"', desc:'Noir matte + inserts bleu phosphorescent.', img:'https://lh3.googleusercontent.com/pw/AP1GczOe5UT0Xd2apmHM3_9OSXgJ8af1pvSXBXZIUlBaWplhsxRc85OFi_U3chtC3wEGDcm-77wbge2DzY47q1F-vdFpYWmxyDic4gK4WMcOUhr7HkbD8w=w1200-h1200' },
+    { id:'np05', code:'NP-05', name:'"Safety First"', desc:'Orange fluo + bandes réfléchissantes. Visibilité maximale.', img:'https://lh3.googleusercontent.com/pw/AP1GczOALgz7-Bwr9z0XfbNHoKxT_hEShmi2-BpWQPpbFxRaeO1sbeQ8_HgmkVczrM5t97s9R9jICQnFJjpbnbCoEccKL_aFAwg_Gkv9pPEzpOgcGpsM6Q=w1200-h1200' },
+    { id:'np06', code:'NP-06', name:'"Rave"', desc:'Spirales psychédéliques rose-vert. Pour la nuit.', img:'https://lh3.googleusercontent.com/pw/AP1GczPxKWyAveEj7h-sTBnuoYWUtu2UC_6OPO6vBFM6JRGTjQYrBgWijXodx1qAClDBYfVfgq3nKzbR7UsXYTLbMhz-N0Ed8968oIdc570vEOs9_Kc6RQ=w1200-h1200', gold:true }
+  ],
+  midnight: [
+    { id:'mn01', code:'MN-01', name:'"Blackout"', desc:'Tout noir matte. L\'invisibilité totale.', img:'https://lh3.googleusercontent.com/pw/AP1GczP_Fleq2rFQ5ccKdfqMwKNZj5FVN5pQYpcIRRJbHHu-m8ctZi5x3t54u00fUSXJ9oecIrISNGo63DGDY48lKAD7N-6f8KqlkILO1mP2tNC6VU9W4A=w1200-h1200' },
+    { id:'mn02', code:'MN-02', name:'"Starlight"', desc:'Noir + micro-particules argentées. Les étoiles.', img:'https://lh3.googleusercontent.com/pw/AP1GczOfCw90iK2asx3rNv8IJJYXBg1rel0dG7ybO_c8z9Ew0aP99cXmh-Pxa_SJwaVL3iQ3Cp-SuvSsyKqi7LXN_itWh2fHeP2GBL2LlG8IYkDN3wLTkQ=w1200-h1200' },
+    { id:'mn03', code:'MN-03', name:'"Moonlight"', desc:'Gris foncé + bleu nuit. La lagune sous la lune.', img:'https://lh3.googleusercontent.com/pw/AP1GczOJ72TaO6KZl_mJlPE5ayEYieqXHY4w2m3DS_Mjn9kmiUMTjFghbNa-3BP4i5l0OwUwPJ8pd2kZjb7QhL9TlEkMaSnn6yMnmRaj3MLXBQdFdCGI4A=w1200-h1200' },
+    { id:'mn04', code:'MN-04', name:'"Shadow"', desc:'Matte + glossy. Le jeu d\'ombres et lumières.', img:'https://lh3.googleusercontent.com/pw/AP1GczN88gliHF9DU56Jsb29vqaUAm-rYqGgqDN8vAlu-Gq_ev5PGezOhTWN7xUoqIYS0Yl-YZBSZ1LIm3ANcnhM8YouHnF_D6r-UzZB0TUuV9wL1w_lwQ=w1200-h1200' },
+    { id:'mn05', code:'MN-05', name:'"Eclipse"', desc:'Noir + détails or. Pour les grands événements.', img:'https://lh3.googleusercontent.com/pw/AP1GczNuCEpG5lCb2AlmOHAkuRPVLToeMH4wcYjBGklEobtJF1Bth-jEKyOYpHVbqQYCwyK2z2mP7o_9TXTy2_ODOtTJANtILAsArsKIFsI1tSQYojjf7Q=w1200-h1200', gold:true },
+    { id:'mn06', code:'MN-06', name:'"Phantom"', desc:'Tout noir technique. Stealth absolu. Sans logo visible.', img:'https://lh3.googleusercontent.com/pw/AP1GczOb0nJInM0CCktzClAl9W60XBr0RhPPdaJSB5NqT-nYvVQBfC5q9FVa0Able_vPd5sqecsXCKXAwsm4UWVPyVr6x8ZdhFzJX2MX1fARC8vBJ-3OAw=w1200-h1200' }
+  ]
+};
+
+// ==================== STATE ====================
+let currentGamme = 'runner';
+let cart = [];
+let currentProduct = null;
+let selectedSize = null;
+let preorders = {};
+GAMMES.forEach(g => { preorders[g.id] = []; });
+
+// Build flat product list
+const allProducts = [];
+GAMMES.forEach(g => {
+  PRODUCTS_DATA[g.id].forEach(p => {
+    allProducts.push({ ...p, gamme: g.id, gammeName: g.name, gammeEmoji: g.emoji, basePrice: g.basePrice, limited: g.limited });
+  });
+});
+
+// ==================== CURRENCY ====================
+function convertPrice(priceXOF, currency) {
+  const rate = RATES[currency] || 1;
+  const sym = SYMBOLS[currency] || 'FCFA';
+  const converted = Math.round(priceXOF * rate);
+  if(currency === 'XOF') return `${converted.toLocaleString()} ${sym}`;
+  if(['EUR','USD','GBP','CAD'].includes(currency)) return `${sym}${converted.toLocaleString()}`;
+  return `${converted.toLocaleString()} ${sym}`;
+}
+
+function updateAllPrices() {
+  const cur = document.getElementById('globalCurrency').value;
+  document.querySelectorAll('.product-price').forEach(el => {
+    const base = parseInt(el.dataset.base);
+    if(base) el.querySelector('.price-val').textContent = convertPrice(base, cur);
+  });
+}
+
+function updateModalPrice() {
+  if(!currentProduct) return;
+  const cur = document.getElementById('modalCurrency').value;
+  document.getElementById('modalPrice').textContent = convertPrice(currentProduct.basePrice, cur);
+}
+
+// ==================== TABS ====================
+function renderTabs() {
+  const tabs = document.getElementById('gammeTabs');
+  tabs.innerHTML = GAMMES.map(g => `
+    <button class="gamme-tab ${g.id === currentGamme ? 'active' : ''} ${g.locked ? 'locked' : ''}" 
+      onclick="selectGamme('${g.id}')">${g.emoji} ${g.name}</button>
+  `).join('');
+}
+
+function selectGamme(id) {
+  currentGamme = id;
+  renderTabs();
+  renderProducts();
+}
+
+// ==================== PRODUCTS ====================
+function renderProducts() {
+  const grid = document.getElementById('productsGrid');
+  const gamme = GAMMES.find(g => g.id === currentGamme);
+  const products = PRODUCTS_DATA[currentGamme];
+  const cur = document.getElementById('globalCurrency').value;
+
+  grid.innerHTML = products.map((p, i) => {
+    const price = convertPrice(gamme.basePrice + (p.gold ? 5000 : 0), cur);
+    const baseVal = gamme.basePrice + (p.gold ? 5000 : 0);
+    return `
+    <div class="product-card reveal" style="transition-delay:${i * 0.05}s" onclick="${gamme.locked ? '' : `openModal(allProducts.find(x=>x.id==='${p.id}'))`}">
+      ${gamme.locked ? `<div class="locked-overlay">
+        <div class="locked-icon">🔒</div>
+        <div class="locked-text">Coming Soon</div>
+        <div class="preorder-form">
+          <input type="email" class="preorder-input" placeholder="votre@email.com" id="pre_${p.id}" onclick="event.stopPropagation()">
+          <button class="preorder-submit" onclick="event.stopPropagation();quickPreorder('${p.id}','${p.code} ${p.name}')">→</button>
+        </div>
+      </div>` : ''}
+      <div class="product-img-wrap">
+        <img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.style.background='#1a1a1a';this.src=''">
+        ${gamme.limited ? `<div class="product-badge limited">Éd. Limitée</div>` : (i === 0 && currentGamme==='runner' ? `<div class="product-badge">Flagship</div>` : '')}
+        ${!gamme.locked ? `<div class="product-arrow">↗</div>` : ''}
+      </div>
+      <div class="product-info">
+        <div class="product-gamme">${gamme.emoji} VELOX ${gamme.name}</div>
+        <div class="product-name">${p.code} ${p.name}</div>
+        <div class="product-desc">${p.desc}</div>
+        <div class="product-bottom">
+          <div class="product-price" data-base="${baseVal}">
+            <span class="price-val">${price}</span>
+          </div>
+          <button class="product-btn ${gamme.locked ? 'preorder' : ''}" 
+            onclick="event.stopPropagation();${gamme.locked ? `quickPreorder('${p.id}','${p.code} ${p.name}')` : `openModal(allProducts.find(x=>x.id==='${p.id}'))`}">
+            ${gamme.locked ? 'Précommande' : 'Voir'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Re-observe new cards
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el => observer.observe(el));
+}
+
+// ==================== MODAL ====================
+function openModal(product) {
+  if(!product) return;
+  currentProduct = product;
+  selectedSize = null;
+
+  const gamme = GAMMES.find(g => g.id === product.gamme);
+  if(gamme && gamme.locked) return;
+
+  document.getElementById('modalName').textContent = `${product.code} ${product.name}`;
+  document.getElementById('modalDesc').textContent = product.desc;
+
+  // Sync currency
+  const cur = document.getElementById('globalCurrency').value;
+  document.getElementById('modalCurrency').value = cur;
+  document.getElementById('modalPrice').textContent = convertPrice(product.basePrice, cur);
+
+  // ---- VIEWER : zoom quadrant sur image 4-panel Grok ----
+  // Layout Grok standard :
+  //   Vue 0 — Profil   : top 60% de l'image, centré
+  //   Vue 1 — Dessus   : bas gauche (bottom-left quadrant)
+  //   Vue 2 — Semelle  : bas droit  (bottom-right quadrant)
+  //   Vue 3 — Complète : image entière (dézoom)
+  const VIEWS = [
+    { label: 'Profil',    bsize: '210% auto', bpos: '50% 5%'   },
+    { label: 'Dessus',    bsize: '250% auto', bpos: '18% 92%'  },
+    { label: 'Semelle',   bsize: '250% auto', bpos: '82% 92%'  },
+    { label: 'Complète',  bsize: '100% auto', bpos: '50% 50%'  },
+  ];
+
+  const imgEl  = document.getElementById('viewerImg');
+  const lblEl  = document.getElementById('viewerLabel');
+  const anglesEl = document.getElementById('viewerAngles');
+
+  // Set background image on viewer + thumbs
+  imgEl.style.backgroundImage = `url('${product.img}')`;
+  applyView(0);
+
+  anglesEl.innerHTML = VIEWS.map((v, i) => `
+    <button class="angle-btn ${i===0?'active':''}" onclick="selectPanel(this,${i})" title="${v.label}">
+      <div class="angle-thumb" style="
+        background-image: url('${product.img}');
+        background-size: ${v.bsize};
+        background-position: ${v.bpos};
+      "></div>
+      <div class="angle-lbl">${v.label}</div>
+    </button>`).join('');
+
+  // Sizes
+  const sizes = [39, 40, 41, 42, 43, 44, 45, 46];
+  document.getElementById('modalSizes').innerHTML = sizes.map(s => `
+    <button class="size-btn" onclick="selectSize(this, ${s})">${s}</button>`).join('');
+
+  // Action
+  document.getElementById('modalActionArea').innerHTML = `
+    <button class="add-cart-btn" onclick="addToCart()">
+      <span>Ajouter au panier</span>
+      <span>→</span>
+    </button>`;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+const VIEWS = [
+  { label: 'Profil',   bsize: '210% auto', bpos: '50% 5%'  },
+  { label: 'Dessus',   bsize: '250% auto', bpos: '18% 92%' },
+  { label: 'Semelle',  bsize: '250% auto', bpos: '82% 92%' },
+  { label: 'Complète', bsize: '100% auto', bpos: '50% 50%' },
+];
+
+function applyView(idx) {
+  const v   = VIEWS[idx];
+  const img = document.getElementById('viewerImg');
+  const lbl = document.getElementById('viewerLabel');
+  if(!img) return;
+  img.style.backgroundSize     = v.bsize;
+  img.style.backgroundPosition = v.bpos;
+  if(lbl) lbl.textContent = v.label;
+}
+
+function selectPanel(btn, idx) {
+  document.querySelectorAll('.angle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyView(idx);
+}
+
+function selectSize(btn, size) {
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedSize = size;
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentProduct = null;
+}
+
+function closeModalIfOutside(e) {
+  if(e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ==================== CART ====================
+function addToCart() {
+  if(!currentProduct) return;
+  if(!selectedSize) { showToast('Sélectionnez une pointure !'); return; }
+  const cur = document.getElementById('globalCurrency').value;
+  cart.push({ ...currentProduct, size: selectedSize, currency: cur, priceDisplay: convertPrice(currentProduct.basePrice, cur) });
+  updateCart();
+  closeModal();
+  showToast(`${currentProduct.code} ajouté au panier ! 🔥`);
+  toggleCart();
+}
+
+function updateCart() {
+  const count = cart.length;
+  const countEl = document.getElementById('cartCount');
+  countEl.textContent = count;
+  countEl.style.display = count > 0 ? 'flex' : 'none';
+
+  const itemsEl = document.getElementById('cartItems');
+  if(count === 0) { itemsEl.innerHTML = '<div class="cart-empty">Votre panier est vide</div>'; }
+  else {
+    itemsEl.innerHTML = cart.map((item, i) => `
+      <div class="cart-item">
+        <img src="${item.img}" alt="${item.name}" onerror="this.style.background='#1a1a1a'">
+        <div class="cart-item-info">
+          <div class="cart-item-name">VELOX ${item.gammeName} ${item.code}</div>
+          <div class="cart-item-size">Pointure ${item.size}</div>
+          <div class="cart-item-price">${item.priceDisplay}</div>
+        </div>
+        <button class="cart-item-remove" onclick="removeFromCart(${i})">✕</button>
+      </div>`).join('');
+  }
+
+  const cur = document.getElementById('globalCurrency').value;
+  const total = cart.reduce((sum, item) => sum + item.basePrice, 0);
+  document.getElementById('cartTotal').textContent = convertPrice(total, cur);
+}
+
+function removeFromCart(i) {
+  cart.splice(i, 1);
+  updateCart();
+}
+
+function toggleCart() {
+  document.getElementById('cartSidebar').classList.toggle('open');
+}
+
+function checkout() {
+  if(cart.length === 0) { showToast('Votre panier est vide'); return; }
+  openCheckout();
+}
+
+// ==================== PAYMENT ====================
+// ⚠️  REMPLACE CES CLÉS PAR TES VRAIES CLÉS AVANT MISE EN LIGNE
+const KKIAPAY_KEY      = 'VOTRE_CLE_PUBLIQUE_KKIAPAY';    // https://app.kkiapay.me
+const FLUTTERWAVE_KEY  = 'VOTRE_CLE_PUBLIQUE_FLUTTERWAVE'; // https://dashboard.flutterwave.com
+
+// EmailJS — https://www.emailjs.com
+const EMAILJS_PUBLIC_KEY   = 'dXz5m8R-NYngomkxD';
+const EMAILJS_SERVICE      = 'service_kxd002k';
+const EMAILJS_TPL_CONFIRM  = 'template_Ic1fzjp';
+const EMAILJS_TPL_PREORDER = 'template_op9fdwr';
+emailjs.init(EMAILJS_PUBLIC_KEY);
+
+let selectedPayMethod = null;
+
+function openCheckout() {
+  const cur = document.getElementById('globalCurrency').value;
+  const totalXOF = cart.reduce((s, i) => s + i.basePrice, 0);
+
+  // Summary
+  document.getElementById('checkoutSummary').innerHTML = cart.map(item => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--grey2);">
+      <div>
+        <div style="font-size:12px;font-weight:500;">${item.code} ${item.name}</div>
+        <div style="font-size:10px;color:var(--grey4);">Pointure ${item.size}</div>
+      </div>
+      <div style="font-family:var(--font-display);font-size:16px;color:var(--accent);">${convertPrice(item.basePrice, cur)}</div>
+    </div>`).join('');
+  document.getElementById('checkoutTotal').textContent = convertPrice(totalXOF, cur);
+
+  // Auto-select method based on currency
+  if(cur === 'XOF') setPayMethod('kkiapay');
+  else              setPayMethod('flutterwave');
+
+  document.getElementById('checkoutOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeCheckoutIfOutside(e) {
+  if(e.target === document.getElementById('checkoutOverlay')) closeCheckout();
+}
+
+function setPayMethod(method) {
+  selectedPayMethod = method;
+  document.getElementById('btn-kkiapay').style.borderColor     = method === 'kkiapay'     ? 'var(--accent)' : 'var(--grey3)';
+  document.getElementById('btn-flutterwave').style.borderColor = method === 'flutterwave' ? 'var(--accent)' : 'var(--grey3)';
+  const notes = {
+    kkiapay:     '📱 Vous serez invité à entrer votre numéro MTN ou MOOV Money.',
+    flutterwave: '💳 Paiement international sécurisé — Visa, Mastercard, et +34 pays africains.'
+  };
+  document.getElementById('pay-method-note').textContent = notes[method] || '';
+}
+
+function processPayment() {
+  const name  = document.getElementById('co-name').value.trim();
+  const email = document.getElementById('co-email').value.trim();
+  const phone = document.getElementById('co-phone').value.trim();
+
+  if(!name)  { showToast('Entrez votre nom svp'); return; }
+  if(!email || !email.includes('@')) { showToast('Email invalide'); return; }
+  if(!selectedPayMethod) { showToast('Choisissez un mode de paiement'); return; }
+
+  const cur      = document.getElementById('globalCurrency').value;
+  const totalXOF = cart.reduce((s, i) => s + i.basePrice, 0);
+  const totalCur = Math.round(totalXOF * (RATES[cur] || 1));
+  const txRef    = 'VELOX-' + Date.now();
+
+  if(selectedPayMethod === 'kkiapay') {
+    // ---- KKIAPAY (Mobile Money XOF) ----
+    openKkiapayWidget({
+      amount:   totalXOF,
+      key:      KKIAPAY_KEY,
+      sandbox:  true,              // ⚠️ mettre false en production
+      theme:    '#e8ff00',
+      name:     name,
+      email:    email,
+      phone:    phone,
+      data:     { order: txRef, items: cart.map(i => i.code).join(',') },
+      callback: url => onPaymentSuccess('kkiapay', txRef)
+    });
+  } else {
+    // ---- FLUTTERWAVE (Cartes / International) ----
+    FlutterwaveCheckout({
+      public_key: FLUTTERWAVE_KEY,
+      tx_ref:     txRef,
+      amount:     totalCur,
+      currency:   cur,
+      customer: { email, name, phone_number: phone },
+      customizations: {
+        title:       'VELOX by VINTRA',
+        description: cart.map(i => `${i.code} P${i.size}`).join(' + '),
+        logo:        'https://i.imgur.com/placeholder.png'
+      },
+      callback: resp => {
+        if(resp.status === 'successful') onPaymentSuccess('flutterwave', txRef);
+        else showToast('Paiement annulé ou échoué.');
+      },
+      onclose: () => {}
+    });
+  }
+}
+
+function onPaymentSuccess(gateway, txRef) {
+  const name  = document.getElementById('co-name').value.trim();
+  const email = document.getElementById('co-email').value.trim();
+  const cur   = document.getElementById('globalCurrency').value;
+  const totalXOF = cart.reduce((s, i) => s + i.basePrice, 0);
+
+  // Build order details string
+  const itemsList = cart.map(i =>
+    `• VELOX ${i.gammeName} ${i.code} ${i.name} — Pointure ${i.size} — ${convertPrice(i.basePrice, cur)}`
+  ).join('\n');
+
+  // 1. Email de confirmation au CLIENT
+  emailjs.send(EMAILJS_SERVICE, EMAILJS_TPL_CONFIRM, {
+    to_name:    name,
+    to_email:   email,
+    order_ref:  txRef,
+    order_items: itemsList,
+    order_total: convertPrice(totalXOF, cur),
+    gateway:    gateway === 'kkiapay' ? 'Mobile Money (MTN/MOOV)' : 'Carte bancaire (Flutterwave)',
+  }).catch(err => console.warn('EmailJS confirm error:', err));
+
+  // 2. Notification interne à VINTRA (réutilise template précommande)
+  emailjs.send(EMAILJS_SERVICE, EMAILJS_TPL_PREORDER, {
+    to_email: 'vintra.bj@gmail.com',
+    product:  itemsList,
+    gamme:    `Réf: ${txRef} | ${gateway} | Total: ${convertPrice(totalXOF, cur)} | Client: ${name} (${email})`,
+  }).catch(err => console.warn('EmailJS admin notif error:', err));
+
+  // Cleanup
+  closeCheckout();
+  cart = [];
+  updateCart();
+  document.getElementById('cartSidebar').classList.remove('open');
+  document.body.style.overflow = '';
+  showToast(`✅ Commande confirmée ! Réf. ${txRef} — Email envoyé 📧`);
+}
+
+// ==================== PREORDER ====================
+function submitPreorder() {
+  const email = document.getElementById('preorderEmail').value.trim();
+  if(!email || !email.includes('@') || !currentProduct) { showToast('Email invalide'); return; }
+
+  const gammeId = currentProduct.gamme;
+  const gammeName = GAMMES.find(g => g.id === gammeId)?.name || gammeId;
+  preorders[gammeId] = preorders[gammeId] || [];
+  preorders[gammeId].push({ email, product: currentProduct.id, date: new Date().toLocaleDateString() });
+
+  // Email de confirmation précommande au client
+  emailjs.send(EMAILJS_SERVICE, EMAILJS_TPL_PREORDER, {
+    to_email:    email,
+    product:     `VELOX ${currentProduct.code} ${currentProduct.name}`,
+    gamme:       gammeName,
+  }).catch(err => console.warn('EmailJS preorder error:', err));
+
+  // Notif admin (réutilise template précommande)
+  emailjs.send(EMAILJS_SERVICE, EMAILJS_TPL_PREORDER, {
+    to_email: 'vintra.bj@gmail.com',
+    product:  `${currentProduct.code} ${currentProduct.name}`,
+    gamme:    `Précommande de ${email} — ${new Date().toLocaleString('fr-FR')}`,
+  }).catch(err => console.warn('EmailJS preorder admin error:', err));
+
+  document.getElementById('preorderEmail').value = '';
+  showToast(`Précommande enregistrée ! Email de confirmation envoyé 📧`);
+}
+
+function quickPreorder(productId, productName) {
+  const emailEl = document.getElementById(`pre_${productId}`);
+  if(!emailEl) return;
+  const email = emailEl.value.trim();
+  if(!email || !email.includes('@')) { showToast('Email invalide'); return; }
+
+  const gamme = GAMMES.find(g => PRODUCTS_DATA[g.id].some(p => p.id === productId));
+  if(gamme) {
+    preorders[gamme.id] = preorders[gamme.id] || [];
+    preorders[gamme.id].push({ email, product: productId, date: new Date().toLocaleDateString() });
+
+    emailjs.send(EMAILJS_SERVICE, EMAILJS_TPL_PREORDER, {
+      to_email: email,
+      product:  productName,
+      gamme:    gamme.name,
+    }).catch(err => console.warn('EmailJS quickpreorder error:', err));
+
+    emailEl.value = '';
+    showToast(`Précommande ${productName} enregistrée ! 📧`);
+  }
+}
+
+// ==================== ADMIN ====================
+const ADMIN_PWD = 'velox2024';
+
+function openAdmin() { document.getElementById('adminOverlay').classList.add('open'); }
+function closeAdmin() { document.getElementById('adminOverlay').classList.remove('open'); }
+function closeAdminIfOutside(e) { if(e.target === document.getElementById('adminOverlay')) closeAdmin(); }
+
+function adminLogin() {
+  const pwd = document.getElementById('adminPassword').value;
+  if(pwd === ADMIN_PWD) {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminDashboard').classList.add('visible');
+    renderAdminDashboard();
+  } else { showToast('Mot de passe incorrect'); }
+}
+
+function renderAdminDashboard() {
+  const list = document.getElementById('adminGammeList');
+  list.innerHTML = GAMMES.map(g => `
+    <div class="gamme-row">
+      <div class="gamme-row-info">
+        <div class="gamme-row-name">${g.emoji} ${g.name}</div>
+        <div class="gamme-row-count">${preorders[g.id]?.length || 0} précommandes</div>
+      </div>
+      <div class="gamme-toggle">
+        <button class="toggle-btn ${g.locked ? 'unlock' : 'lock'}" onclick="toggleGamme('${g.id}')">
+          ${g.locked ? '🔓 Débloquer' : '🔒 Verrouiller'}
+        </button>
+      </div>
+    </div>`).join('');
+
+  const stats = document.getElementById('preorderStats');
+  stats.innerHTML = GAMMES.map(g => `
+    <div class="stat-row">
+      <span class="stat-name">${g.emoji} ${g.name}</span>
+      <span class="stat-count">${preorders[g.id]?.length || 0}</span>
+    </div>`).join('');
+}
+
+function toggleGamme(id) {
+  const gamme = GAMMES.find(g => g.id === id);
+  if(!gamme) return;
+  gamme.locked = !gamme.locked;
+  renderTabs();
+  renderProducts();
+  renderAdminDashboard();
+  showToast(`${gamme.name} ${gamme.locked ? 'verrouillée 🔒' : 'débloquée ! 🔓'}`);
+}
+
+// ==================== TOAST ====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ==================== SCROLL REVEAL ====================
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ==================== CURSOR ====================
+const cur = document.getElementById('cur');
+const ring = document.getElementById('cur-ring');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top = e.clientY + 'px';
+  setTimeout(() => { ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px'; }, 60);
+});
+document.querySelectorAll('a, button, .product-card').forEach(el => {
+  el.addEventListener('mouseenter', () => { cur.classList.add('big'); ring.classList.add('big'); });
+  el.addEventListener('mouseleave', () => { cur.classList.remove('big'); ring.classList.remove('big'); });
+});
+
+// ==================== NAV SCROLL ====================
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ==================== LOADER + GSAP ====================
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = document.getElementById('loader');
+    gsap.to(loader, { opacity: 0, duration: 0.6, onComplete: () => { loader.style.display = 'none'; animateHero(); } });
+  }, 3200);
+});
+
+function animateCounter(id, target, duration) {
+  let start = 0;
+  const step = target / (duration / 16);
+  const el = document.getElementById(id);
+  const timer = setInterval(() => {
+    start += step;
+    if (start >= target) { start = target; clearInterval(timer); }
+    el.textContent = Math.floor(start) + (id === 'cnt3' ? '' : '');
+  }, 16);
+}
+
+function animateHero() {
+  gsap.to('#heroEyebrow', { opacity: 1, y: 0, duration: 0.8, delay: 0.1 });
+  gsap.to('#heroBrand', { opacity: 1, y: 0, duration: 1, delay: 0.3, ease: 'power3.out' });
+  gsap.to('#heroTagline', { opacity: 1, y: 0, duration: 0.8, delay: 0.6 });
+  gsap.to('#heroCounters', { opacity: 1, y: 0, duration: 0.8, delay: 0.9 });
+  gsap.to('#heroCta', { opacity: 1, y: 0, duration: 0.8, delay: 1.1 });
+  gsap.to('#heroScroll', { opacity: 1, duration: 0.8, delay: 1.4 });
+
+  // Animate counters
+  setTimeout(() => {
+    animateCounter('cnt1', 5, 1200);
+    animateCounter('cnt2', 48, 1400);
+    
+  }, 900);
+
+  // Parallax hero brand
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.to('#heroBrand', {
+    yPercent: -30, ease: 'none',
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
+  });
+}
+
+// ==================== INIT ====================
+renderTabs();
+renderProducts();
+updateCart();
+</script>
+</body>
+</html>
