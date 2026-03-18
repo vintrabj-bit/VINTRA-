@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VELOX — Step Into Motion</title>
-<meta name="description" content="VELOX by VINTRA — Sneakers conçues pour les rues de Bénin. Précommandez maintenant.">
+<meta name="description" content="VELOX by VINTRA — La première sneaker pensée pour les rues de Cotonou. Précommandez maintenant.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root{
   --black:#000;--white:#fff;--yellow:#e8ff00;--cyan:#00f5ff;
@@ -17,12 +18,12 @@ html{scroll-behavior:smooth;}
 body{background:var(--black);color:var(--white);font-family:'Outfit',sans-serif;overflow-x:hidden;}
 
 /* LOADER */
-#loader{position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
-.l-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(60px,22vw,120px);letter-spacing:8px;color:#fff;text-shadow:0 0 40px rgba(232,255,0,0.7);}
+#loader{position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;}
+.l-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,24vw,140px);letter-spacing:8px;color:#fff;text-shadow:0 0 40px rgba(232,255,0,0.7);}
 .l-bar{width:180px;height:2px;background:#111;position:relative;overflow:hidden;}
-.l-bar::after{content:'';position:absolute;left:-100%;top:0;width:100%;height:100%;background:var(--yellow);animation:lFill 2s ease forwards;}
+.l-bar::after{content:'';position:absolute;left:-100%;top:0;width:100%;height:100%;background:var(--yellow);animation:lFill 2.2s ease forwards;}
 @keyframes lFill{to{left:0;}}
-.l-sub{font-size:11px;letter-spacing:6px;color:var(--muted);text-transform:uppercase;}
+.l-by{font-size:11px;letter-spacing:6px;color:var(--muted);text-transform:uppercase;}
 
 /* HEADER */
 header{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);border-bottom:1px solid rgba(232,255,0,0.08);}
@@ -52,15 +53,19 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 18px;display
 .s-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,11vw,80px);line-height:1;margin-bottom:6px;}
 .s-sub{font-size:13px;color:var(--muted);line-height:1.7;}
 
-/* MODEL CARDS */
-.models{padding:0 0 56px;}
-.model-card{margin:0 16px 14px;background:var(--gray2);border:1px solid var(--gray3);position:relative;overflow:hidden;}
-.model-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--yellow));}
-.model-img-wrap{position:relative;overflow:hidden;}
-.model-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--gray);transition:transform 0.5s ease;min-height:180px;}
-.model-card:hover .model-img{transform:scale(1.03);}
-.m-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.8);border:1px solid rgba(232,255,0,0.35);font-size:9px;letter-spacing:3px;color:var(--yellow);padding:4px 9px;text-transform:uppercase;}
-.m-limited{position:absolute;top:10px;right:10px;background:var(--yellow);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;padding:3px 9px;}
+/* GALLERY */
+.models{padding:0 16px 56px;display:flex;justify-content:center;}
+.model-card{width:100%;max-width:560px;background:var(--gray2);border:1px solid var(--gray3);position:relative;overflow:hidden;}
+.model-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--yellow);}
+.gallery-main{position:relative;overflow:hidden;background:var(--gray);}
+.gallery-main img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;transition:opacity 0.3s ease;}
+.gallery-thumbs{display:flex;gap:4px;padding:8px;}
+.g-thumb{flex:1;border:2px solid transparent;cursor:pointer;overflow:hidden;transition:border-color .2s;padding:0;background:none;}
+.g-thumb.active{border-color:var(--yellow);}
+.g-thumb img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+.m-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.8);border:1px solid rgba(232,255,0,0.35);font-size:9px;letter-spacing:3px;color:var(--yellow);padding:4px 9px;text-transform:uppercase;z-index:2;}
+
+/* MODEL BODY */
 .model-body{padding:18px 16px;}
 .model-code{font-size:9px;letter-spacing:4px;color:var(--muted);margin-bottom:3px;}
 .model-name{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;margin-bottom:6px;}
@@ -69,7 +74,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 18px;display
 .model-stock{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:9px 12px;background:var(--black);}
 .stock-label{font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
 .stock-bar{height:2px;background:var(--gray3);margin-top:5px;}
-.stock-fill{height:100%;transition:width 0.5s ease;}
+.stock-fill{height:100%;transition:width 0.5s ease;background:var(--yellow);}
 .stock-num{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--yellow);}
 .size-group{margin-bottom:14px;}
 .size-lbl{font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:7px;}
@@ -81,6 +86,25 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 18px;display
 .model-price small{font-size:12px;color:var(--muted);font-family:'Outfit',sans-serif;font-weight:400;}
 .btn-order{flex:1;background:var(--yellow);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;padding:13px;border:none;cursor:pointer;box-shadow:0 0 18px rgba(232,255,0,0.25);transition:all 0.2s;}
 .btn-order:active{transform:scale(0.97);}
+
+/* ZONES */
+.zones{padding:0 16px 56px;}
+.zones-box{max-width:560px;margin:0 auto;background:var(--gray2);border:1px solid var(--gray3);border-top:2px solid var(--yellow);overflow:hidden;}
+.zones-intro{padding:20px 18px 16px;font-size:13px;color:var(--light);line-height:1.7;border-bottom:1px solid var(--gray3);}
+.zones-intro strong{color:var(--yellow);}
+.zone-row{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid #1a1a1a;gap:12px;}
+.zone-row:last-child{border-bottom:none;}
+.zone-left{display:flex;align-items:flex-start;gap:10px;flex:1;}
+.zone-flag{font-size:18px;line-height:1;margin-top:2px;}
+.zone-name{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:var(--white);}
+.zone-countries{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5;}
+.zone-price{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--yellow);white-space:nowrap;text-align:right;}
+.zone-price.pending{color:var(--muted);font-size:13px;font-family:'Outfit',sans-serif;letter-spacing:1px;}
+.zones-how{padding:18px;background:var(--black);}
+.zones-how-title{font-size:10px;letter-spacing:4px;color:var(--yellow);text-transform:uppercase;margin-bottom:12px;}
+.zones-step{display:flex;gap:10px;margin-bottom:9px;font-size:12px;color:var(--light);line-height:1.5;}
+.zones-step span{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--yellow);min-width:20px;}
+.zones-footer{padding:14px 18px;font-size:11px;color:var(--muted);border-top:1px solid var(--gray3);font-style:italic;}
 
 /* NEWSLETTER */
 .newsletter{padding:56px 20px;background:linear-gradient(135deg,#050500,#080800);border-top:1px solid rgba(232,255,0,0.12);border-bottom:1px solid rgba(232,255,0,0.12);}
@@ -103,15 +127,6 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 18px;display
 .s-tt{background:#111;color:#fff;border:1px solid #333;}
 .s-ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;}
 .s-cp{background:var(--gray3);color:var(--light);}
-
-/* BRANDS */
-.brands{padding:56px 20px;}
-.brands-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:24px;}
-.brand-tile{background:var(--gray2);padding:22px 16px;border-top:2px solid var(--bc,#333);opacity:0.6;}
-.brand-name2{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:2px;}
-.brand-dom{font-size:11px;color:var(--muted);margin-bottom:9px;}
-.brand-st{display:inline-flex;align-items:center;gap:5px;font-size:9px;letter-spacing:2px;color:var(--muted);border:1px solid #2a2a2a;padding:3px 8px;text-transform:uppercase;}
-.brand-st::before{content:'';width:4px;height:4px;background:#333;border-radius:50%;}
 
 /* FOOTER */
 footer{padding:36px 20px;border-top:1px solid var(--gray3);}
@@ -148,6 +163,13 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
 .success-title2{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;margin-bottom:7px;}
 .success-text2{color:var(--muted);font-size:13px;line-height:1.7;}
 
+/* SOLD OUT */
+#soldout{position:fixed;inset:0;background:#000;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;}
+#soldout .so-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(60px,20vw,120px);color:var(--yellow);letter-spacing:4px;line-height:1;}
+#soldout .so-sub{font-size:13px;letter-spacing:4px;color:var(--light);text-transform:uppercase;margin-top:16px;}
+#soldout .so-msg{font-size:14px;color:#666;margin-top:32px;max-width:320px;line-height:1.7;}
+#soldout .so-line{width:60px;height:1px;background:var(--yellow);margin:24px auto;opacity:0.4;}
+
 /* ADMIN */
 .admin-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:500;display:none;align-items:center;justify-content:center;padding:14px;}
 .admin-overlay.open{display:flex;}
@@ -165,35 +187,6 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
 .a-pw{background:var(--black);border:1px solid var(--gray3);color:var(--white);padding:12px 13px;font-family:'Outfit',sans-serif;font-size:14px;outline:none;border-radius:0;-webkit-appearance:none;width:100%;margin-bottom:8px;}
 .a-pw:focus{border-color:var(--yellow);}
 .btn-a-login{width:100%;background:var(--yellow);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;padding:13px;border:none;cursor:pointer;margin-bottom:7px;}
-
-/* 4-ANGLE VIEWER */
-.viewer{position:relative;background:var(--gray2);}
-.viewer-main{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--gray);}
-.viewer-img{
-  width:100%;height:100%;
-  background-size:cover;background-repeat:no-repeat;background-position:center center;
-  transition:background-position 0.45s cubic-bezier(.4,0,.2,1), background-size 0.45s cubic-bezier(.4,0,.2,1);
-}
-.viewer-lbl{
-  position:absolute;bottom:10px;left:10px;
-  background:rgba(0,0,0,0.6);color:#fff;
-  font-size:9px;letter-spacing:3px;text-transform:uppercase;
-  padding:4px 10px;backdrop-filter:blur(4px);
-}
-.viewer-tabs{display:flex;gap:4px;padding:8px;}
-.angle-btn{
-  flex:1;background:var(--black);border:2px solid transparent;
-  cursor:pointer;overflow:hidden;transition:border-color .2s;padding:0;
-}
-.angle-btn.active{border-color:var(--yellow);}
-.angle-thumb{
-  width:100%;aspect-ratio:1;
-  background-repeat:no-repeat;
-  transition:background-size .3s, background-position .3s;
-}
-.angle-lbl{font-size:8px;text-align:center;color:var(--muted);padding:4px 2px;letter-spacing:2px;text-transform:uppercase;font-family:'Outfit',sans-serif;}
-.m-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.8);border:1px solid rgba(232,255,0,0.35);font-size:9px;letter-spacing:3px;color:var(--yellow);padding:4px 9px;text-transform:uppercase;z-index:2;}
-.m-limited{position:absolute;top:10px;right:10px;background:var(--yellow);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;padding:3px 9px;z-index:2;}
 .admin-trigger{position:fixed;bottom:14px;right:14px;width:30px;height:30px;background:none;border:1px solid #1a1a1a;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;opacity:0.15;transition:opacity 0.2s;z-index:50;}
 .admin-trigger:hover{opacity:0.7;}
 
@@ -208,7 +201,7 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
 <div id="loader">
   <div class="l-logo">VELOX</div>
   <div class="l-bar"></div>
-  <div class="l-sub">By VINTRA · Cotonou 🇧🇯</div>
+  <div class="l-by">By VINTRA · Cotonou 🇧🇯</div>
 </div>
 
 <!-- HEADER -->
@@ -227,36 +220,39 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-glow"></div>
-  <div class="hero-eye">Lancement Phase 1 — Édition Limitée 100 paires</div>
+  <div class="hero-eye">Lancement Phase 1 — Édition Limitée 50 paires</div>
   <h1 class="hero-title">VELOX</h1>
   <div class="hero-by">By VINTRA · Bénin 🇧🇯</div>
-  <p class="hero-desc">Les premières sneakers pensées pour les rues, le sable et la nuit de Cotonou.</p>
-  <a href="#modeles" class="hero-cta">Découvrir les modèles →</a>
+  <p class="hero-desc">La première sneaker pensée pour les rues, le sable et la nuit de Cotonou.</p>
+  <a href="#modeles" class="hero-cta">Découvrir le modèle →</a>
   <div class="hero-badge">
-    <strong id="heroCount">0</strong>&nbsp;précommandes sur 100 paires disponibles
+    <strong id="heroCount">0</strong>&nbsp;précommandes sur 50 paires disponibles
   </div>
 </section>
 
-<!-- MODELS SECTION -->
+<!-- MODEL SECTION -->
 <div class="s-head" id="modeles">
-  <div class="s-label">↳ Phase 1 — 3 Modèles</div>
+  <div class="s-label">↳ Phase 1 — Modèle Unique</div>
   <h2 class="s-title">PRÉCOMMANDEZ<br>MAINTENANT.</h2>
-  <p class="s-sub">Édition limitée à 100 paires. Livraison Bénin uniquement.</p>
+  <p class="s-sub">Édition limitée à 50 paires. Livraison mondiale disponible.</p>
 </div>
 
 <div class="models">
-
-  <!-- LE BITUME -->
-  <div class="model-card" style="--accent:#e8ff00;">
-    <div class="model-img-wrap">
-    <div class="viewer">
-      <div class="m-badge">4 ANGLES</div>
-      <div class="viewer-main">
-        <div class="viewer-img" id="vimg-rn01" style="background-image:url('https://lh3.googleusercontent.com/pw/AP1GczPDTiFJ6TUDEZbF2sr-pUucP0AQ2z8vNIZePDW5WH80IIFjTGtPB1q3GNTFfyKxIoDBQegEIMlBl_huvI3CcpnX_-b8z3QkFJxnrUNb9ksy4fOkXA=w1200-h1200');"></div>
-        <div class="viewer-lbl" id="vlbl-rn01">Profil</div>
-      </div>
-      <div class="viewer-tabs" id="vtabs-rn01"></div>
+  <div class="model-card">
+    <div class="gallery-main">
+      <div class="m-badge">VELOX BITUME</div>
+      <img id="gMain" src="https://lh3.googleusercontent.com/pw/AP1GczNawmx3imWxSz_lOhB2YO3RaCyJ6CYVKIFPyRIyQQLEqR8Y6mBrsC82pSLso_4TXBElxVxRn4bJTVnLNDkYV5GQBIgn0mPhv2Sb7zvcScPolDfaZg=w1200-h1200" alt="VELOX Le Bitume" referrerpolicy="no-referrer">
     </div>
+    <div class="gallery-thumbs">
+      <button class="g-thumb active" onclick="switchImg(0,this)">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczNawmx3imWxSz_lOhB2YO3RaCyJ6CYVKIFPyRIyQQLEqR8Y6mBrsC82pSLso_4TXBElxVxRn4bJTVnLNDkYV5GQBIgn0mPhv2Sb7zvcScPolDfaZg=w200-h200" alt="Vue 1" referrerpolicy="no-referrer">
+      </button>
+      <button class="g-thumb" onclick="switchImg(1,this)">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczNjeVC9Szf_zPvNqUtUV81GYBdI9DInk3nEsAd7nyJf-TR27_Qan2Fso0h6CjNWbyiiKoUol3dkscjcrVF3t2meg49CWoynQ36sPdgks4UtviRJaQ=w200-h200" alt="Vue 2" referrerpolicy="no-referrer">
+      </button>
+      <button class="g-thumb" onclick="switchImg(2,this)">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczMT63d9JixTCyZv-2PXLr1V7FgZZ8-TJXH38-dqdbUgX8HtLRRjic3RdaRs63Ohu__cht8jzn-YI5gmvwc3PKEksrTuMlVEc9aNz8ZUvb6q2fTxYg=w200-h200" alt="Vue 3" referrerpolicy="no-referrer">
+      </button>
     </div>
     <div class="model-body">
       <div class="model-code">VELOX / RN-01</div>
@@ -265,7 +261,7 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
       <div class="model-stock">
         <div style="flex:1;">
           <div class="stock-label">Paires restantes</div>
-          <div class="stock-bar"><div class="stock-fill" id="sfill-rn01" style="background:var(--yellow);width:100%;"></div></div>
+          <div class="stock-bar"><div class="stock-fill" id="sfill-rn01" style="width:100%;"></div></div>
         </div>
         <div class="stock-num" id="snum-rn01">—</div>
       </div>
@@ -283,106 +279,89 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
         </div>
       </div>
       <div class="model-foot">
-        <div class="model-price">25 000 <small>XOF · PRÉCOMMANDE</small></div>
-        <button class="btn-order" onclick="openModal('Le Bitume','RN-01','25 000 XOF','rn01')">PRÉCOMMANDER</button>
+        <div class="model-price">— <small>PRIX À VENIR</small></div>
+        <button class="btn-order" onclick="openModal('Le Bitume','RN-01','Prix à confirmer','rn01')">PRÉCOMMANDER</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- LE SABLE -->
-  <div class="model-card" style="--accent:#ffaa00;">
-    <div class="model-img-wrap">
-    <div class="viewer">
-      <div class="m-badge">4 ANGLES</div>
-      <div class="viewer-main">
-        <div class="viewer-img" id="vimg-rn02" style="background-image:url('https://lh3.googleusercontent.com/pw/AP1GczNf-mSERVEp-YojCnZseXq3Y1J7jsHNdXaLSjrqb4LPsr_xHoxXyIIejEIfCsnsf4ZOjeAdecwJcwpInidfxyd1LVpQFmZZGRfAL0jrPq9QLcQ9ug=w1200-h1200');"></div>
-        <div class="viewer-lbl" id="vlbl-rn02">Profil</div>
-      </div>
-      <div class="viewer-tabs" id="vtabs-rn02"></div>
+<!-- ZONES LIVRAISON -->
+<div class="s-head">
+  <div class="s-label">↳ Expédition mondiale</div>
+  <h2 class="s-title">PRIX PAR<br>ZONE.</h2>
+</div>
+<div class="zones">
+  <div class="zones-box">
+    <div class="zones-intro">
+      Le prix que vous voyez inclut la sneaker <strong>+ les frais de livraison</strong> jusqu'à votre domicile.<br>
+      <strong>Aucun frais caché.</strong> Le montant varie selon votre localisation.
     </div>
-    </div>
-    <div class="model-body">
-      <div class="model-code">VELOX / RN-02</div>
-      <div class="model-name">Le Sable</div>
-      <div class="model-desc">Bitume le matin, piste rouge l'après-midi, plage le soir. Une seule paire pour tout gérer. <em>Plus besoin de choisir entre style et praticité.</em></div>
-      <div class="model-stock">
-        <div style="flex:1;">
-          <div class="stock-label">Paires restantes</div>
-          <div class="stock-bar"><div class="stock-fill" id="sfill-rn02" style="background:#ffaa00;width:100%;"></div></div>
-        </div>
-        <div class="stock-num" id="snum-rn02">—</div>
-      </div>
-      <div class="size-group">
-        <span class="size-lbl">Taille (EU)</span>
-        <div class="sizes" id="sz-rn02">
-          <button class="sz" onclick="pickSize(this,'rn02')">38</button>
-          <button class="sz" onclick="pickSize(this,'rn02')">39</button>
-          <button class="sz" onclick="pickSize(this,'rn02')">40</button>
-          <button class="sz" onclick="pickSize(this,'rn02')">41</button>
-          <button class="sz" onclick="pickSize(this,'rn02')">42</button>
-          <button class="sz" onclick="pickSize(this,'rn02')">43</button>
-          <button class="sz" onclick="pickSize(this,'rn02')">44</button>
-          <button class="sz" onclick="pickSize(this,'rn02')">45</button>
+    <div class="zone-row">
+      <div class="zone-left">
+        <div class="zone-flag">🇧🇯</div>
+        <div>
+          <div class="zone-name">Zone A — Bénin</div>
+          <div class="zone-countries">Tout le territoire béninois</div>
         </div>
       </div>
-      <div class="model-foot">
-        <div class="model-price">25 000 <small>XOF · PRÉCOMMANDE</small></div>
-        <button class="btn-order" onclick="openModal('Le Sable','RN-02','25 000 XOF','rn02')">PRÉCOMMANDER</button>
-      </div>
+      <div class="zone-price pending">Bientôt</div>
     </div>
+    <div class="zone-row">
+      <div class="zone-left">
+        <div class="zone-flag">🌍</div>
+        <div>
+          <div class="zone-name">Zone B — Afrique de l'Ouest</div>
+          <div class="zone-countries">Burkina Faso, Niger, Nigeria, Togo, Sénégal, Côte d'Ivoire, Ghana, Mali, Guinée…</div>
+        </div>
+      </div>
+      <div class="zone-price pending">Bientôt</div>
+    </div>
+    <div class="zone-row">
+      <div class="zone-left">
+        <div class="zone-flag">🌍</div>
+        <div>
+          <div class="zone-name">Zone C — Reste de l'Afrique</div>
+          <div class="zone-countries">Afrique centrale, australe, orientale et du Nord</div>
+        </div>
+      </div>
+      <div class="zone-price pending">Bientôt</div>
+    </div>
+    <div class="zone-row">
+      <div class="zone-left">
+        <div class="zone-flag">🇪🇺</div>
+        <div>
+          <div class="zone-name">Zone D — Europe</div>
+          <div class="zone-countries">Union Européenne, Royaume-Uni, Suisse…</div>
+        </div>
+      </div>
+      <div class="zone-price pending">Bientôt</div>
+    </div>
+    <div class="zone-row">
+      <div class="zone-left">
+        <div class="zone-flag">🌎</div>
+        <div>
+          <div class="zone-name">Zone E — Amériques, Asie, Océanie</div>
+          <div class="zone-countries">États-Unis, Canada, Amérique latine, Chine, Japon, Australie…</div>
+        </div>
+      </div>
+      <div class="zone-price pending">Bientôt</div>
+    </div>
+    <div class="zones-how">
+      <div class="zones-how-title">📦 Comment ça fonctionne ?</div>
+      <div class="zones-step"><span>1.</span>Choisissez votre zone et passez votre précommande sur le site.</div>
+      <div class="zones-step"><span>2.</span>Nous vous contactons pour confirmer votre adresse et le mode de livraison (La Poste, DHL, etc.).</div>
+      <div class="zones-step"><span>3.</span>Vous payez le montant total indiqué selon votre zone à la livraison.</div>
+    </div>
+    <div class="zones-footer">Questions ? Écrivez-nous : vintra.bj@gmail.com — VELOX by VINTRA</div>
   </div>
-
-  <!-- ZÉMIDJAN NIGHT -->
-  <div class="model-card" style="--accent:#00f5ff;">
-    <div class="model-img-wrap">
-    <div class="viewer">
-      <div class="m-badge">4 ANGLES</div>
-      <div class="m-limited">ÉDITION LIMITÉE</div>
-      <div class="viewer-main">
-        <div class="viewer-img" id="vimg-np01" style="background-image:url('https://lh3.googleusercontent.com/pw/AP1GczPP3izTvOWI9xNnmT6gCBcRa9OmqQLnYs6dNSztJzLgot74AekgbFDeGruFIbghdIJjEZAVvgLx9Bf604rQwWQWfN-pqb0BlxxOT8CdGfKvWwbE5Q=w1200-h1200');"></div>
-        <div class="viewer-lbl" id="vlbl-np01">Profil</div>
-      </div>
-      <div class="viewer-tabs" id="vtabs-np01"></div>
-    </div>
-    </div>
-    <div class="model-body">
-      <div class="model-code">VELOX / NP-01</div>
-      <div class="model-name">Zémidjan Night</div>
-      <div class="model-desc">La nuit à Cotonou, les motos ne s'arrêtent pas. Toi non plus. Réfléchissante, lumineuse, unique. <em>Parce que sortir la nuit, ça se fait avec style et en sécurité.</em></div>
-      <div class="model-stock">
-        <div style="flex:1;">
-          <div class="stock-label">Paires restantes</div>
-          <div class="stock-bar"><div class="stock-fill" id="sfill-np01" style="background:#00f5ff;width:100%;"></div></div>
-        </div>
-        <div class="stock-num" id="snum-np01">—</div>
-      </div>
-      <div class="size-group">
-        <span class="size-lbl">Taille (EU)</span>
-        <div class="sizes" id="sz-np01">
-          <button class="sz" onclick="pickSize(this,'np01')">38</button>
-          <button class="sz" onclick="pickSize(this,'np01')">39</button>
-          <button class="sz" onclick="pickSize(this,'np01')">40</button>
-          <button class="sz" onclick="pickSize(this,'np01')">41</button>
-          <button class="sz" onclick="pickSize(this,'np01')">42</button>
-          <button class="sz" onclick="pickSize(this,'np01')">43</button>
-          <button class="sz" onclick="pickSize(this,'np01')">44</button>
-          <button class="sz" onclick="pickSize(this,'np01')">45</button>
-        </div>
-      </div>
-      <div class="model-foot">
-        <div class="model-price">25 000 <small>XOF · PRÉCOMMANDE</small></div>
-        <button class="btn-order" onclick="openModal('Zémidjan Night','NP-01','25 000 XOF','np01')">PRÉCOMMANDER</button>
-      </div>
-    </div>
-  </div>
-
 </div>
 
 <!-- NEWSLETTER -->
 <section class="newsletter">
   <div class="s-label">↳ Restez informés</div>
-  <h2 class="nl-title">SOYEZ LES <span>PREMIERS</span><br>À PRÉCOMMANDER.</h2>
-  <p class="nl-sub">Inscrivez-vous pour être notifié en avant-première des prochains modèles et éditions limitées VELOX.</p>
+  <h2 class="nl-title">SOYEZ LES <span>PREMIERS</span><br>À SAVOIR.</h2>
+  <p class="nl-sub">Inscrivez-vous pour être notifié des prix finaux, du prochain drop et des éditions limitées VELOX.</p>
   <div class="nl-form">
     <input type="email" class="nl-input" id="nlEmail" placeholder="votre@email.com">
     <button class="nl-btn" onclick="subscribeNL()">S'INSCRIRE →</button>
@@ -398,18 +377,6 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
     <a class="s-btn s-tt" href="https://tiktok.com/@vintra_official" target="_blank">🎵 TikTok</a>
     <a class="s-btn s-ig" href="https://instagram.com/velox_bj" target="_blank">📸 Instagram</a>
     <button class="s-btn s-cp" onclick="copyLink()">🔗 Copier</button>
-  </div>
-</section>
-
-<!-- AUTRES MARQUES -->
-<section class="brands">
-  <div class="s-label">↳ L'écosystème VINTRA</div>
-  <h2 class="s-title">NOS PROCHAINES<br>INNOVATIONS.</h2>
-  <div class="brands-grid">
-    <div class="brand-tile" style="--bc:#00d4ff;"><div class="brand-name2">KAFFEIN</div><div class="brand-dom">Energy Drinks</div><div class="brand-st">En développement</div></div>
-    <div class="brand-tile" style="--bc:#ff4d00;"><div class="brand-name2">GOOK</div><div class="brand-dom">Automobile</div><div class="brand-st">En développement</div></div>
-    <div class="brand-tile" style="--bc:#00ff88;"><div class="brand-name2">GREECO</div><div class="brand-dom">Écologie</div><div class="brand-st">En développement</div></div>
-    <div class="brand-tile" style="--bc:#ff00aa;"><div class="brand-name2">GIVES</div><div class="brand-dom">Travel</div><div class="brand-st">En développement</div></div>
   </div>
 </section>
 
@@ -436,7 +403,7 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
         <div>
           <div class="m-code2" id="mCode">VELOX / RN-01</div>
           <div class="m-name2" id="mName">Le Bitume</div>
-          <div class="m-price2" id="mPrice">25 000 XOF</div>
+          <div class="m-price2" id="mPrice">Prix à confirmer</div>
         </div>
         <button class="m-close" onclick="closeModal()">✕</button>
       </div>
@@ -474,11 +441,11 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
         </div>
       </div>
       <div class="fgroup">
-        <label>Ville de livraison</label>
-        <input type="text" id="fCity" placeholder="Cotonou, Porto-Novo...">
+        <label>Ville / Pays de livraison</label>
+        <input type="text" id="fCity" placeholder="Cotonou, Paris, New York...">
       </div>
       <button class="btn-submit" id="submitBtn" onclick="submitOrder()">CONFIRMER LA PRÉCOMMANDE</button>
-      <p class="fnote">📱 Paiement MTN Money ou MOOV Money à la confirmation.<br>Notre équipe vous contacte sous 24h.</p>
+      <p class="fnote">Aucun paiement immédiat. Notre équipe vous contacte sous 24h pour confirmer votre commande et le prix selon votre zone.</p>
     </div>
     <div class="success-view" id="successView">
       <div class="success-icon">🎉</div>
@@ -486,6 +453,14 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
       <p class="success-text2">Email de confirmation envoyé.<br>Notre équipe vous contacte sous 24h.<br><br><strong style="color:var(--yellow);">Merci de faire confiance à VELOX. 🇧🇯</strong></p>
     </div>
   </div>
+</div>
+
+<!-- SOLD OUT -->
+<div id="soldout">
+  <div class="so-title">SOLD OUT</div>
+  <div class="so-sub">50 / 50 paires</div>
+  <div class="so-line"></div>
+  <div class="so-msg">Les 50 premières paires ont été réservées. Merci pour votre confiance.<br><br>Le prochain drop arrive bientôt — suivez-nous sur TikTok et YouTube pour ne pas le rater.</div>
 </div>
 
 <!-- ADMIN -->
@@ -501,7 +476,7 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
       <div class="admin-stats">
         <div class="stat"><div class="stat-n" id="aTot">0</div><div class="stat-l">Total</div></div>
         <div class="stat"><div class="stat-n" id="aToday">0</div><div class="stat-l">Auj.</div></div>
-        <div class="stat"><div class="stat-n" id="aLeft">100</div><div class="stat-l">Restant</div></div>
+        <div class="stat"><div class="stat-n" id="aLeft">50</div><div class="stat-l">Restant</div></div>
       </div>
       <div class="admin-orders" id="aOrders"></div>
       <button class="btn-csv" onclick="exportCSV()">📥 Exporter CSV</button>
@@ -513,69 +488,40 @@ footer{padding:36px 20px;border-top:1px solid var(--gray3);}
 <button class="admin-trigger" onclick="openAdmin()">⚙</button>
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="https://cdn.kkiapay.me/k.js"></script>
 <script>
-const EJS_KEY='dXz5m8R-NYngomkxD',EJS_SVC='service_kxd002k',TPL='template_Ic1fzjp',TPL_ADMIN='template_op9fdwr',APW='velox2025',MAX=100,MAX_PER=100;
-
-// 4-ANGLE VIEWER
-// 4-ANGLE VIEWER
-const VIEWS=[
-  {label:'Profil',   bsize:'210% auto', bpos:'50% 5%'  },
-  {label:'Dessus',   bsize:'250% auto', bpos:'18% 92%' },
-  {label:'Semelle',  bsize:'250% auto', bpos:'82% 92%' },
-  {label:'Complète', bsize:'100% auto', bpos:'50% 50%' },
-];
-
-function initViewer(mid, imgUrl) {
-  const tabs = document.getElementById('vtabs-'+mid);
-  tabs.innerHTML = VIEWS.map((v,i) => `
-    <button class="angle-btn ${i===0?'active':''}" onclick="selectPanel('${mid}',this,${i})">
-      <div class="angle-thumb" style="background-image:url('${imgUrl}');background-size:${v.bsize};background-position:${v.bpos};"></div>
-      <div class="angle-lbl">${v.label}</div>
-    </button>`).join('');
-  applyView(mid, 0);
-}
-
-function applyView(mid, idx) {
-  const v = VIEWS[idx];
-  const img = document.getElementById('vimg-'+mid);
-  const lbl = document.getElementById('vlbl-'+mid);
-  if(img){ img.style.backgroundSize = v.bsize; img.style.backgroundPosition = v.bpos; }
-  if(lbl) lbl.textContent = v.label;
-}
-
-function selectPanel(mid, btn, idx) {
-  btn.closest('.viewer-tabs').querySelectorAll('.angle-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  applyView(mid, idx);
-}
-let orders=JSON.parse(localStorage.getItem('velox_v3')||'[]');
-let nl=JSON.parse(localStorage.getItem('velox_nl')||'[]');
-let cur={},sizes={};
+const EJS_KEY='dXz5m8R-NYngomkxD',EJS_SVC='service_kxd002k',TPL='template_Ic1fzjp',TPL_ADMIN='template_op9fdwr',APW='17a0c785143cce9961453cf00a316dd6e9f929005f291256f5cfe48893f40719',MAX_PER=50;
 emailjs.init(EJS_KEY);
 
-window.addEventListener('load',()=>{
-  setTimeout(()=>{const l=document.getElementById('loader');l.style.transition='opacity 0.6s';l.style.opacity='0';setTimeout(()=>l.style.display='none',600);},2400);
-  refresh();
-  initViewer('rn01','https://lh3.googleusercontent.com/pw/AP1GczPDTiFJ6TUDEZbF2sr-pUucP0AQ2z8vNIZePDW5WH80IIFjTGtPB1q3GNTFfyKxIoDBQegEIMlBl_huvI3CcpnX_-b8z3QkFJxnrUNb9ksy4fOkXA=w1200-h1200');
-  initViewer('rn02','https://lh3.googleusercontent.com/pw/AP1GczNf-mSERVEp-YojCnZseXq3Y1J7jsHNdXaLSjrqb4LPsr_xHoxXyIIejEIfCsnsf4ZOjeAdecwJcwpInidfxyd1LVpQFmZZGRfAL0jrPq9QLcQ9ug=w1200-h1200');
-  initViewer('np01','https://lh3.googleusercontent.com/pw/AP1GczPP3izTvOWI9xNnmT6gCBcRa9OmqQLnYs6dNSztJzLgot74AekgbFDeGruFIbghdIJjEZAVvgLx9Bf604rQwWQWfN-pqb0BlxxOT8CdGfKvWwbE5Q=w1200-h1200');
-});
+const IMGS=[
+  'https://lh3.googleusercontent.com/pw/AP1GczNawmx3imWxSz_lOhB2YO3RaCyJ6CYVKIFPyRIyQQLEqR8Y6mBrsC82pSLso_4TXBElxVxRn4bJTVnLNDkYV5GQBIgn0mPhv2Sb7zvcScPolDfaZg=w1200-h1200',
+  'https://lh3.googleusercontent.com/pw/AP1GczNjeVC9Szf_zPvNqUtUV81GYBdI9DInk3nEsAd7nyJf-TR27_Qan2Fso0h6CjNWbyiiKoUol3dkscjcrVF3t2meg49CWoynQ36sPdgks4UtviRJaQ=w1200-h1200',
+  'https://lh3.googleusercontent.com/pw/AP1GczMT63d9JixTCyZv-2PXLr1V7FgZZ8-TJXH38-dqdbUgX8HtLRRjic3RdaRs63Ohu__cht8jzn-YI5gmvwc3PKEksrTuMlVEc9aNz8ZUvb6q2fTxYg=w1200-h1200'
+];
+
+function switchImg(idx,btn){
+  const main=document.getElementById('gMain');
+  main.style.opacity='0';
+  setTimeout(()=>{main.src=IMGS[idx];main.style.opacity='1';},220);
+  document.querySelectorAll('.g-thumb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+let orders=JSON.parse(localStorage.getItem('velox_v3')||'[]');
+let nl=JSON.parse(localStorage.getItem('velox_nl')||'[]');
+let sizes={};
+let cur={};
 
 function refresh(){
-  const tot=orders.reduce((a,o)=>a+parseInt(o.qty||1),0);
+  const used=orders.reduce((a,o)=>a+parseInt(o.qty||1),0);
   document.getElementById('headerCount').textContent=orders.length;
   document.getElementById('heroCount').textContent=orders.length;
-  ['rn01','rn02','np01'].forEach(m=>{
-    const used=orders.filter(o=>o.mid===m).reduce((a,o)=>a+parseInt(o.qty||1),0);
-    const left=Math.max(0,MAX_PER-used);
-    const pct=(left/MAX_PER)*100;
-    const n=document.getElementById('snum-'+m);
-    const b=document.getElementById('sfill-'+m);
-    if(n)n.textContent=left+' paires';
-    if(b)b.style.width=pct+'%';
-  });
+  const left=Math.max(0,MAX_PER-used);
+  const pct=(left/MAX_PER)*100;
+  const n=document.getElementById('snum-rn01');
+  const b=document.getElementById('sfill-rn01');
+  if(n)n.textContent=left+' paires';
+  if(b)b.style.width=pct+'%';
+  if(used>=MAX_PER)document.getElementById('soldout').style.display='flex';
 }
 
 function pickSize(btn,mid){
@@ -598,8 +544,6 @@ function openModal(name,code,price,mid){
 function closeModal(){document.getElementById('orderOverlay').classList.remove('open');document.body.style.overflow='';}
 function closeOutside(e){if(e.target===document.getElementById('orderOverlay'))closeModal();}
 
-let pendingOrder = null;
-
 async function submitOrder(){
   const name=document.getElementById('fName').value.trim();
   const email=document.getElementById('fEmail').value.trim();
@@ -608,45 +552,21 @@ async function submitOrder(){
   const qty=document.getElementById('fQty').value;
   const city=document.getElementById('fCity').value.trim();
   if(!name||!email||!phone||!size||!city){showToast('⚠️ REMPLIS TOUS LES CHAMPS');return;}
-
-  // Sauvegarder les données avant ouverture du widget
-  pendingOrder = {name,email,phone,size,qty,city,product:cur.name,code:cur.code,mid:cur.mid};
-
-  openKkiapayWidget({
-    amount: 25000,
-    api_key: '632851201eb011f18f528b78a180edb4',
-    sandbox: false,
-    email: email,
-    phone: phone,
-    name: name
-  });
-}
-
-async function confirmOrderAfterPayment(){
-  if(!pendingOrder) return;
-  const {name,email,phone,size,qty,city} = pendingOrder;
   const btn=document.getElementById('submitBtn');
   btn.disabled=true;btn.textContent='ENVOI...';
-  const o={id:Date.now(),date:new Date().toLocaleDateString('fr-FR'),product:pendingOrder.product,code:pendingOrder.code,price:'25 000 XOF',mid:pendingOrder.mid,name,email,phone,size,qty,city};
+  const o={id:Date.now(),date:new Date().toLocaleDateString('fr-FR'),product:cur.name,code:cur.code,price:cur.price,mid:cur.mid,name,email,phone,size,qty,city};
   try{
-    await emailjs.send(EJS_SVC,TPL,{to_name:name,to_email:email,product_name:pendingOrder.product,product_code:pendingOrder.code,product_price:'25 000 XOF',size,qty,city,phone});
-    await emailjs.send(EJS_SVC,TPL_ADMIN,{to_name:name,to_email:email,product_name:pendingOrder.product,product_code:pendingOrder.code,product_price:'25 000 XOF',size,qty,city,phone,date:new Date().toLocaleString('fr-FR')});
+    await emailjs.send(EJS_SVC,TPL,{to_name:name,to_email:email,product_name:cur.name,product_code:cur.code,product_price:cur.price,size,qty,city,phone});
+    await emailjs.send(EJS_SVC,TPL_ADMIN,{to_name:name,to_email:email,product_name:cur.name,product_code:cur.code,product_price:cur.price,size,qty,city,phone,date:new Date().toLocaleString('fr-FR')});
     orders.push(o);
     localStorage.setItem('velox_v3',JSON.stringify(orders));
     refresh();
     document.getElementById('formView').style.display='none';
     document.getElementById('successView').style.display='block';
-    showToast('✅ PAIEMENT & PRÉCOMMANDE CONFIRMÉS !');
-    pendingOrder = null;
-  }catch(e){showToast('❌ ERREUR EMAIL — RÉESSAIE');console.error(e);}
+    showToast('✅ PRÉCOMMANDE CONFIRMÉE !');
+  }catch(e){showToast('❌ ERREUR — RÉESSAIE');console.error(e);}
   btn.disabled=false;btn.textContent='CONFIRMER LA PRÉCOMMANDE';
 }
-
-window.addEventListener('load', function(){
-  if(typeof addSuccessListener === 'function'){
-    addSuccessListener(function(){ confirmOrderAfterPayment(); });
-  }
-});
 
 function subscribeNL(){
   const e=document.getElementById('nlEmail').value.trim();
@@ -657,24 +577,28 @@ function subscribeNL(){
   showToast('✅ INSCRIPTION CONFIRMÉE !');
 }
 
-function shareWA(){const url=window.location.href;const msg=encodeURIComponent('🔥 VELOX — Les premières sneakers made in Bénin ! Édition limitée 100 paires. Dès 25 000 XOF. 👟🇧🇯\n\n'+url);window.open('https://wa.me/?text='+msg,'_blank');}
+function shareWA(){const url=window.location.href;const msg=encodeURIComponent('🔥 VELOX — La première sneaker made in Bénin ! Édition limitée 50 paires. 👟🇧🇯\n\n'+url);window.open('https://wa.me/?text='+msg,'_blank');}
 function copyLink(){navigator.clipboard.writeText(window.location.href).then(()=>showToast('🔗 LIEN COPIÉ !')).catch(()=>showToast('❌ ERREUR'));}
 
 function openAdmin(){document.getElementById('adminOverlay').classList.add('open');}
 function closeAdmin(){document.getElementById('adminOverlay').classList.remove('open');document.getElementById('aDash').style.display='none';document.getElementById('aLogin').style.display='block';document.getElementById('aPw').value='';}
 function checkAdmin(){
-  if(document.getElementById('aPw').value===APW){
-    document.getElementById('aLogin').style.display='none';
-    document.getElementById('aDash').style.display='block';
-    loadDash();
-  }else showToast('❌ MOT DE PASSE INCORRECT');
+  const input=document.getElementById('aPw').value;
+  crypto.subtle.digest('SHA-256',new TextEncoder().encode(input)).then(buf=>{
+    const hash=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    if(hash===APW){
+      document.getElementById('aLogin').style.display='none';
+      document.getElementById('aDash').style.display='block';
+      loadDash();
+    }else showToast('❌ MOT DE PASSE INCORRECT');
+  });
 }
 function loadDash(){
   const today=new Date().toLocaleDateString('fr-FR');
-  const tot=orders.reduce((a,o)=>a+parseInt(o.qty||1),0);
+  const used=orders.reduce((a,o)=>a+parseInt(o.qty||1),0);
   document.getElementById('aTot').textContent=orders.length;
   document.getElementById('aToday').textContent=orders.filter(o=>o.date===today).length;
-  document.getElementById('aLeft').textContent=Math.max(0,MAX-tot);
+  document.getElementById('aLeft').textContent=Math.max(0,MAX_PER-used);
   const list=document.getElementById('aOrders');
   if(!orders.length){list.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:14px 0;">Aucune précommande.</div>';return;}
   list.innerHTML=[...orders].reverse().map(o=>`<div class="o-item"><strong>${o.code} — ${o.product} · T${o.size} · x${o.qty||1}</strong>${o.name} · ${o.city} · ${o.date}</div>`).join('');
@@ -689,6 +613,9 @@ function exportCSV(){
   showToast('📥 CSV EXPORTÉ !');
 }
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+
+setTimeout(()=>{const l=document.getElementById('loader');l.style.transition='opacity 0.6s';l.style.opacity='0';setTimeout(()=>l.style.display='none',600);},2400);
+refresh();
 </script>
 </body>
 </html>
